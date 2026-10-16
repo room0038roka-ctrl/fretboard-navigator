@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Smart Fretboard Pro | 7 Church Modes RGB24 Navigator</title>
+  <title>Smart Fretboard Pro | Modal & Out-Scale Navigator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <script>
@@ -29,6 +29,7 @@
               fifth: '#4ea885',
               seventh: '#d9a74a',
               char: '#9d7cd8',
+              out: '#e07a5f',
               scale: '#8b99ab'
             }
           }
@@ -45,7 +46,6 @@
       -webkit-user-select: none;
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -61,22 +61,14 @@
       background: #3e495c;
     }
 
-    /* Warm Rosewood / Matte Ebony Fretboard Surface (No harsh contrast) */
+    /* Warm Rosewood / Matte Ebony Fretboard Surface */
     .fretboard-surface {
       background: linear-gradient(180deg, #211c19 0%, #191513 50%, #211c19 100%);
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(0,0,0,0.35);
       position: relative;
     }
 
-    .fret-wire {
-      background: #475569;
-    }
-
-    .nut-wire {
-      background: #94a3b8;
-    }
-
-    /* Guitar Strings - Subtle & Easy on the Eyes */
+    /* Guitar Strings */
     .guitar-string {
       position: absolute;
       left: 0;
@@ -145,7 +137,7 @@
       border: 1.5px solid #edd096;
     }
 
-    /* 5. Characteristic Note (Modal Flavor): Soft Lavender Amethyst */
+    /* 5. Characteristic / Altered Tension Note: Soft Lavender Amethyst */
     .led-char {
       background-color: #7956b3;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
@@ -165,7 +157,7 @@
       border: 1px solid #526075;
     }
 
-    /* 7. Avoid Note (Careful/Passing only): Dimmed & Dashed so you never hit it by mistake */
+    /* 7. Avoid Note: Dimmed & Dashed */
     .led-avoid {
       background-color: #191d24;
       color: #64748b;
@@ -173,7 +165,6 @@
       opacity: 0.55;
     }
 
-    /* Subtle pulse when played */
     @keyframes notePluck {
       0% { transform: scale(1.22); }
       100% { transform: scale(1); }
@@ -182,14 +173,12 @@
       animation: notePluck 0.28s ease-out;
     }
 
-    /* Fretboard Inlay Dots */
     .inlay-dot {
       background: rgba(203, 213, 225, 0.12);
       border: 1px solid rgba(203, 213, 225, 0.16);
       pointer-events: none;
     }
 
-    /* Active Pad Calm Highlight */
     .section-pad-active {
       border-color: #4da8da !important;
       background-color: #232d3b !important;
@@ -197,126 +186,154 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-start p-1.5 sm:p-3 gap-2">
+<body class="min-h-screen flex flex-col p-1.5 sm:p-3 gap-2">
 
-  <!-- 1. COMPACT HEADER + 12-KEY QUICK SELECTOR (Fits on 1 screen with Fretboard in Mobile Landscape) -->
-  <header class="bg-studio-panel border border-studio-border rounded-xl px-2.5 py-2 flex flex-col gap-2 shadow-md">
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <!-- Active Key/Mode Readout Badge -->
-      <div class="flex items-center gap-2.5">
-        <div class="flex items-center bg-studio-bg border border-studio-border rounded-lg px-2.5 py-1 gap-2.5">
-          <div class="flex items-baseline gap-1.5">
-            <span id="headerKeyDisplay" class="text-lg sm:text-xl font-extrabold font-mono text-neon-root">D</span>
-            <span id="headerScaleDisplay" class="text-xs sm:text-sm font-bold text-neon-third">Ⅱ Dorian (ドリアン)</span>
-          </div>
-          <span id="headerParentKeyBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-studio-panel text-slate-300 border border-studio-border hidden md:inline-block">親Key: C Major (Ⅱ度)</span>
-        </div>
-
-        <div class="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-300 bg-studio-bg/60 px-2.5 py-1 rounded-lg border border-studio-border/60">
-          <span id="headerCharNoteSummary" class="text-neon-char font-bold">★特性音: M6</span>
-          <span class="text-slate-600">|</span>
-          <span id="headerNotesFormula" class="text-[11px] tracking-wide">D(R) - E(2) - F(b3) - G(4) - A(5) - B(6★) - C(b7)</span>
-        </div>
+  <!-- TOP COMPACT HEADER -->
+  <header class="bg-studio-panel border border-studio-border rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+    <!-- Left: Active Scale Readout -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-neon-root"></span>
+        <span class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-200 hidden md:inline">SMART FRETBOARD</span>
       </div>
 
-      <!-- Compact Utility Controls -->
-      <div class="flex flex-wrap items-center gap-1.5">
-        <button id="btnFocusToggle" onclick="toggleFocusMode()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border border-neon-third/40 bg-studio-panelLight text-neon-third hover:bg-slate-700 transition" title="指板とKey選択だけを残して下部パネルを折りたたみます">
-          📱 指板＆Key集中
-        </button>
-
-        <button onclick="playCurrentModeAudition()" class="px-2 py-1 rounded-lg text-[11px] font-bold border border-studio-border bg-studio-panelLight text-slate-200 hover:bg-slate-700 flex items-center gap-1 transition" title="現在のスケールの響きを試聴">
-          <span>🎵 試聴</span>
-        </button>
-
-        <button id="btnAudioToggle" onclick="toggleAudioMute()" class="px-2 py-1 rounded-lg text-[11px] font-semibold border border-studio-border bg-studio-panelLight text-neon-fifth hover:bg-slate-700 flex items-center gap-1 transition">
-          <span id="audioIcon">🔊</span>
-          <span id="audioStatusText" class="hidden sm:inline">ON</span>
-        </button>
-
-        <div class="flex rounded-lg overflow-hidden border border-studio-border bg-studio-bg p-0.5 text-[11px] font-mono">
-          <button id="btnFrets22" onclick="setFretCount(22)" class="px-1.5 py-0.5 rounded text-slate-400 hover:text-white transition">22F</button>
-          <button id="btnFrets24" onclick="setFretCount(24)" class="px-1.5 py-0.5 rounded bg-studio-panelLight text-slate-100 font-bold transition">24F</button>
+      <!-- Current Live Readout Badge -->
+      <div class="flex items-center bg-studio-bg border border-studio-border rounded-lg px-2.5 py-1 gap-2.5">
+        <div class="flex items-baseline gap-1.5">
+          <span id="headerKeyDisplay" class="text-lg sm:text-xl font-extrabold font-mono text-neon-root">C</span>
+          <span id="headerScaleDisplay" class="text-xs sm:text-sm font-bold text-neon-third">Ⅰ Ionian (メジャー)</span>
         </div>
-
-        <button id="btnPovToggle" onclick="toggleOrientation()" class="px-2 py-1 rounded-lg text-[11px] font-semibold border border-studio-border bg-studio-panelLight text-slate-200 hover:bg-slate-700 transition flex items-center gap-1">
-          <span id="povStatusText" class="text-neon-third font-bold">1弦=上</span>
-        </button>
-
-        <div class="flex rounded-lg overflow-hidden border border-studio-border bg-studio-bg p-0.5 text-[11px]">
-          <button id="btnLabelInterval" onclick="setLabelMode('interval')" class="px-2 py-0.5 rounded bg-studio-panelLight text-neon-third font-bold transition">度数</button>
-          <button id="btnLabelNote" onclick="setLabelMode('note')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition">音名</button>
-        </div>
-
-        <button id="btnMidiModal" onclick="openMidiModal()" class="px-2 py-1 rounded-lg text-[11px] font-semibold border border-studio-border bg-studio-panelLight text-slate-300 hover:border-slate-500 flex items-center gap-1 transition">
-          <span id="midiStatusDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-          <span class="hidden sm:inline">MIDI</span>
-        </button>
+        <span id="headerParentKeyBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-studio-panel text-slate-300 border border-studio-border hidden sm:inline">想定Key: C (Ⅰ度)</span>
+        <span id="headerNotesFormula" class="text-[11px] font-mono text-slate-400 hidden xl:inline border-l border-studio-border pl-2.5">C(R) - D(2) - E(3) - F(4⚠️) - G(5) - A(6) - B(M7★)</span>
       </div>
     </div>
 
-    <!-- 1. KEY SETTING BAR (Top Priority - Minimal Space Single Row 12-Key Grid) -->
-    <div class="flex items-center gap-1.5 pt-1 border-t border-studio-border/80">
-      <div class="flex items-center gap-1 shrink-0">
-        <span class="w-2 h-2 rounded-full bg-neon-root"></span>
-        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 mr-1">Key設定</span>
-        <button onclick="transposeRoot(-1)" class="px-1.5 py-1 rounded bg-studio-bg hover:bg-slate-700 text-slate-300 border border-studio-border font-mono text-[11px] transition" title="半音下げる">-1</button>
-        <button onclick="transposeRoot(1)" class="px-1.5 py-1 rounded bg-studio-bg hover:bg-slate-700 text-slate-300 border border-studio-border font-mono text-[11px] transition" title="半音上げる">+1</button>
+    <!-- Right: Compact Controls & Mobile Landscape Focus Mode -->
+    <div class="flex flex-wrap items-center gap-1.5">
+      <!-- Compact Landscape Focus Toggle (Hides Lower Panels for pure Key + Fretboard use) -->
+      <button id="btnCompactFocus" onclick="toggleCompactMode()" class="px-2.5 py-1 rounded-lg text-xs font-bold border border-neon-third/50 bg-studio-panelLight text-neon-third hover:bg-slate-700 flex items-center gap-1 transition" title="スマホ横画面向けに『Key設定』と『指板』だけを表示します">
+        <span>📱</span>
+        <span id="compactModeText">指板＆Key集中: OFF</span>
+      </button>
+
+      <!-- Audition Button -->
+      <button onclick="playCurrentModeAudition()" class="px-2 py-1 rounded-lg text-xs font-bold border border-studio-border bg-studio-panelLight text-slate-200 hover:bg-slate-700 transition" title="現在のスケールのコードと特徴音を試聴">
+        🎵 試聴
+      </button>
+
+      <!-- Audio Mute -->
+      <button id="btnAudioToggle" onclick="toggleAudioMute()" class="px-2 py-1 rounded-lg text-xs font-semibold border border-studio-border bg-studio-panelLight text-neon-fifth hover:bg-slate-700 transition">
+        <span id="audioIcon">🔊</span>
+      </button>
+
+      <!-- 22F / 24F -->
+      <div class="flex rounded-lg overflow-hidden border border-studio-border bg-studio-bg p-0.5 text-[11px] font-mono">
+        <button id="btnFrets22" onclick="setFretCount(22)" class="px-1.5 py-0.5 rounded text-slate-400 hover:text-white transition">22F</button>
+        <button id="btnFrets24" onclick="setFretCount(24)" class="px-1.5 py-0.5 rounded bg-studio-panelLight text-slate-100 font-bold transition">24F</button>
       </div>
-      <div id="keySelectorGrid" class="grid grid-cols-12 gap-1 flex-grow">
-        <!-- Populated by JS: 12 Keys in 1 sleek row -->
+
+      <!-- String POV -->
+      <button id="btnPovToggle" onclick="toggleOrientation()" class="px-2 py-1 rounded-lg text-[11px] font-semibold border border-studio-border bg-studio-panelLight text-slate-200 hover:bg-slate-700 transition">
+        <span id="povStatusText" class="text-neon-third font-bold">1弦=上</span>
+      </button>
+
+      <!-- Degree / Note Label -->
+      <div class="flex rounded-lg overflow-hidden border border-studio-border bg-studio-bg p-0.5 text-[11px]">
+        <button id="btnLabelInterval" onclick="setLabelMode('interval')" class="px-2 py-0.5 rounded bg-studio-panelLight text-neon-third font-bold transition">度数</button>
+        <button id="btnLabelNote" onclick="setLabelMode('note')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition">音名</button>
       </div>
+
+      <!-- MIDI Button -->
+      <button onclick="openMidiModal()" class="px-2 py-1 rounded-lg text-[11px] font-semibold border border-studio-border bg-studio-panelLight text-slate-300 hover:border-slate-500 flex items-center gap-1 transition">
+        <span id="midiStatusDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span class="hidden sm:inline">MIDI</span>
+      </button>
     </div>
   </header>
 
-  <!-- 2. MAIN INTERACTIVE FRETBOARD CONTAINER -->
-  <section class="bg-studio-panel border border-studio-border rounded-xl p-2 sm:p-3 shadow-lg flex flex-col gap-2">
+  <!-- 1. TOP PRIORITY: 12-KEY BAR & 1-TAP OUT / DOMINant LAUNCHER -->
+  <section class="bg-studio-panel border border-studio-border rounded-xl p-2 flex flex-col gap-1.5 shadow-sm">
     
-    <!-- Top Fretboard Sub-Toolbar: Legend, Avoid Toggle, Filter Modes & Position Zone Highlight -->
-    <div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px] pb-1 border-b border-studio-border">
-      <!-- Interval Color Legend -->
-      <div class="flex flex-wrap items-center gap-2.5">
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-root inline-block"></span>
-          <span class="text-slate-200 font-semibold">R</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-third inline-block"></span>
-          <span class="text-slate-200 font-semibold">3rd</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-fifth inline-block"></span>
-          <span class="text-slate-200 font-semibold">5th(b5/#5)</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-seventh inline-block"></span>
-          <span class="text-slate-200 font-semibold">7th(6/dim7)</span>
-        </div>
-        <div class="flex items-center gap-1 bg-studio-bg border border-studio-border px-1.5 py-0.5 rounded">
-          <span class="w-2.5 h-2.5 rounded-full led-char inline-block"></span>
-          <span class="text-neon-char font-bold">★特性音/オルタード</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-scale inline-block"></span>
-          <span class="text-slate-400">テンション</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-full led-avoid inline-block"></span>
-          <span class="text-slate-500">Avoid</span>
+    <!-- Row 1: 12 Keys Selector (Minimal vertical footprint, 12 columns in 1 row on landscape/tablet) -->
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5">
+      <div class="flex items-center justify-between w-full sm:w-auto sm:shrink-0 gap-1.5 pr-1">
+        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-neon-root"></span>1. Key設定
+        </span>
+        <div class="flex items-center gap-1 text-[10px] font-mono">
+          <button onclick="transposeRoot(-1)" class="px-1.5 py-0.5 rounded bg-studio-bg hover:bg-slate-700 text-slate-300 border border-studio-border" title="半音下げる">-1</button>
+          <button onclick="transposeRoot(1)" class="px-1.5 py-0.5 rounded bg-studio-bg hover:bg-slate-700 text-slate-300 border border-studio-border" title="半音上げる">+1</button>
+          <button onclick="transposeRoot(5)" class="px-1.5 py-0.5 rounded bg-studio-bg hover:bg-slate-700 text-slate-300 border border-studio-border" title="4度進行">+4度</button>
         </div>
       </div>
 
-      <!-- Display Filter, Avoid Control & Zone Range -->
+      <!-- 12 Key Buttons Grid -->
+      <div id="keySelectorGrid" class="grid grid-cols-6 sm:grid-cols-12 gap-1 w-full">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Row 2: 1-Tap Out-Scale & Dominant Launcher (Solves "In Key=C, I want G7 Altered immediately" in 1 tap!) -->
+    <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-studio-border/80 text-xs">
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-studio-bg text-amber-300 border border-amber-500/30">
+          ⚡ 想定Key=<span id="homeKeyLabel" class="font-mono underline">C</span> からの1タップ進行＆アウト切替:
+        </span>
+      </div>
+      <div id="outScaleLauncherBar" class="flex flex-wrap items-center gap-1 flex-grow">
+        <!-- Populated dynamically by JS based on Home Key -->
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN INTERACTIVE FRETBOARD CONTAINER -->
+  <section class="bg-studio-panel border border-studio-border rounded-xl p-2 sm:p-3 shadow-md flex flex-col gap-2">
+    
+    <!-- Fretboard Sub-Toolbar: Legend, Avoid Toggle, Filter & Zone -->
+    <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] pb-1 border-b border-studio-border">
+      <!-- Color Legend -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-root inline-block"></span>
+          <span class="text-slate-200 font-semibold">R(根音)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-third inline-block"></span>
+          <span class="text-slate-200 font-semibold">3rd(m3/M3)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-fifth inline-block"></span>
+          <span class="text-slate-200 font-semibold">5th(P5/b5)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-seventh inline-block"></span>
+          <span class="text-slate-200 font-semibold">7th(b7/M7/dim7)</span>
+        </div>
+        <div class="flex items-center gap-1 bg-studio-bg border border-studio-border px-1.5 py-0.5 rounded">
+          <span class="w-2.5 h-2.5 rounded-full led-char inline-block"></span>
+          <span class="text-neon-char font-bold">★特性音・オルタード(b9,#9,#11,b13)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-scale inline-block"></span>
+          <span class="text-slate-400">スケール音</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-full led-avoid inline-block"></span>
+          <span class="text-slate-500">アヴォイド</span>
+        </div>
+      </div>
+
+      <!-- Filters & Zone Range -->
       <div class="flex flex-wrap items-center gap-1.5">
         <button id="btnAvoidMode" onclick="toggleAvoidVisibility()" class="px-2 py-0.5 rounded bg-studio-bg border border-studio-border text-slate-300 hover:border-slate-500 transition">
-          ⚠️ Avoid: <span id="avoidModeText" class="text-amber-400/90">暗め</span>
+          ⚠️Avoid: <span id="avoidModeText" class="text-amber-400/90">暗め</span>
         </button>
 
         <div class="flex items-center bg-studio-bg border border-studio-border rounded p-0.5">
-          <button onclick="setFilterMode('all')" id="filter-all" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-studio-panelLight text-slate-100 transition">フル</button>
-          <button onclick="setFilterMode('safe')" id="filter-safe" class="px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white transition">Avoid除外</button>
-          <button onclick="setFilterMode('char_focus')" id="filter-char_focus" class="px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white transition">コード+★</button>
-          <button onclick="setFilterMode('chord')" id="filter-chord" class="px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white transition">コード</button>
+          <button onclick="setFilterMode('all')" id="filter-all" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-studio-panelLight text-slate-100 transition">全音</button>
+          <button onclick="setFilterMode('safe')" id="filter-safe" class="px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition">Avoid除外</button>
+          <button onclick="setFilterMode('char_focus')" id="filter-char_focus" class="px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition">コード+★</button>
+          <button onclick="setFilterMode('chord')" id="filter-chord" class="px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition">コードのみ</button>
         </div>
 
         <div class="flex items-center bg-studio-bg border border-studio-border rounded p-0.5 font-mono">
@@ -329,144 +346,152 @@
       </div>
     </div>
 
-    <!-- Scrollable / Responsive Fretboard Wrapper -->
+    <!-- Scrollable Fretboard Wrapper -->
     <div class="w-full overflow-x-auto pb-0.5 select-none">
-      <div id="fretboardWrapper" class="min-w-[880px] w-full flex flex-col">
-        <!-- Top Fret Numbers Row -->
-        <div id="fretNumbersTop" class="grid w-full mb-0.5 text-center font-mono text-[10px] select-none"></div>
+      <div id="fretboardWrapper" class="min-w-[900px] w-full flex flex-col">
+        <!-- Top Fret Numbers -->
+        <div id="fretNumbersTop" class="grid w-full mb-1 text-center font-mono text-[11px] select-none"></div>
 
-        <!-- Actual Rosewood/Matte Ebony Fretboard Surface -->
+        <!-- Rosewood / Ebony Fretboard Surface -->
         <div id="fretboardSurface" class="fretboard-surface rounded-lg border-y border-stone-700/70 py-1.5 relative">
-          <!-- Inlay Markers Layer -->
           <div id="fretInlaysLayer" class="absolute inset-0 pointer-events-none z-0"></div>
-          <!-- Strings & Frets Grid Layer -->
           <div id="fretGridRows" class="relative z-10 flex flex-col gap-1 sm:gap-1.5"></div>
         </div>
 
-        <!-- Bottom Fret Numbers Row -->
-        <div id="fretNumbersBottom" class="grid w-full mt-0.5 text-center font-mono text-[10px] select-none"></div>
+        <!-- Bottom Fret Numbers -->
+        <div id="fretNumbersBottom" class="grid w-full mt-1 text-center font-mono text-[11px] select-none"></div>
+      </div>
+    </div>
+
+    <!-- Relative / Derivation Bar (Shows shared parent scale or symmetrical equivalents) -->
+    <div id="derivationContainer" class="bg-studio-bg border border-studio-border rounded-lg p-2 flex flex-col gap-1.5">
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span id="parentScaleExplainText" class="text-[11px] text-slate-300">
+          🔄 親スケール共有 / 派生モード切替
+        </span>
+        <span id="charNoteFlavorBadge" class="text-[11px] font-medium text-neon-char bg-studio-panel border border-studio-border px-2 py-0.5 rounded">
+          ★特性音解説
+        </span>
+      </div>
+      <div id="relativeModesBar" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1">
+        <!-- Populated dynamically by JS -->
       </div>
     </div>
   </section>
 
-  <!-- 3. LOWER WORKSPACE: SCALE SETTINGS (BELOW FRETBOARD) & SETLIST -->
-  <div id="lowerControlsWrapper" class="flex flex-col gap-2.5">
+  <!-- 2. LOWER WORKSPACE: SCALE SETTINGS (CHURCH MODES + JAZZ/OUT SCALES) & SETLIST -->
+  <div id="lowerWorkspace" class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-grow">
     
-    <!-- RELATIVE / DERIVATION BAR -->
-    <div class="bg-studio-panel border border-studio-border rounded-xl p-2.5 flex flex-col gap-2 shadow-md">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex flex-wrap items-center gap-2">
-          <span id="derivationBadgeTitle" class="text-[11px] font-bold px-2 py-0.5 rounded bg-studio-panelLight text-neon-third border border-studio-border">
-            🔄 親メジャースケール共有 (平行調モード切替)
-          </span>
-          <span id="parentScaleExplainText" class="text-xs text-slate-300"></span>
+    <!-- LEFT COLUMN (6 cols): 2. SCALE SETTINGS (7 Church Modes + 5 Jazz/Out Scales) -->
+    <div class="lg:col-span-6 bg-studio-panel border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-3 shadow-sm">
+      
+      <div class="flex flex-col gap-2.5">
+        <div class="flex items-center justify-between border-b border-studio-border pb-1.5">
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-neon-third"></span>
+            2. スケール設定 (直接選択 / ルート固定比較)
+          </h2>
+          <span id="scaleChordHint" class="text-[11px] font-mono text-neon-seventh"> 対応コード: CMaj7</span>
         </div>
-        <div id="charNoteFlavorBadge" class="text-xs font-medium text-slate-300 bg-studio-bg border border-studio-border px-2.5 py-0.5 rounded-lg"></div>
+
+        <!-- Category A: 7 Church Modes -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 mb-1 flex items-center justify-between">
+            <span>⛪ 7つのチャーチモード (教会旋法)</span>
+            <span class="text-[10px] font-mono text-slate-500">ダイアトニック7音</span>
+          </div>
+          <div id="churchModesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Category B: 5 Jazz / Fusion / Out Scales -->
+        <div class="pt-1 border-t border-studio-border/60">
+          <div class="text-[11px] font-bold text-amber-300/90 mb-1 flex items-center justify-between">
+            <span>🔥 メロディックマイナー & ドミナント・アウト系スケール (5種)</span>
+            <span class="text-[10px] font-mono text-slate-400">オルタード / コンディミ / リディアン♭7</span>
+          </div>
+          <div id="jazzOutScalesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
       </div>
 
-      <!-- 7 Relative Modes of the Current Parent Major Key (or Related Melodic Minor Modes) -->
-      <div id="relativeModesBar" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5"></div>
+      <!-- Quick Save to Setlist -->
+      <div class="pt-2 border-t border-studio-border flex items-center justify-between gap-2">
+        <div class="text-[11px] text-slate-400">
+          現在の <strong id="quickSavePreview" class="text-slate-200 font-mono">C Ionian</strong> を右のセットリストへ追加
+        </div>
+        <button onclick="addCurrentStateAsSection()" class="px-3 py-1.5 rounded-lg bg-studio-panelLight hover:bg-slate-700 text-neon-third border border-studio-border text-xs font-bold transition shrink-0">
+          ＋ セクション登録
+        </button>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+    <!-- RIGHT COLUMN (6 cols): LIVE SETLIST & SECTION PADS -->
+    <div class="lg:col-span-6 bg-studio-panel border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-2.5 shadow-sm">
       
-      <!-- LEFT COLUMN (6 cols): SCALE SETTINGS (7 Church Modes + 5 Jazz/Minor/Symmetrical Scales) -->
-      <div class="lg:col-span-6 bg-studio-panel border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-3 shadow-md">
-        <div class="space-y-3">
-          <div class="flex items-center justify-between border-b border-studio-border pb-1.5">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-neon-char"></span>
-              スケール設定 (7つの教会旋法 ＋ 実戦ジャズ/シンメトリカル)
-            </h2>
-            <span id="scaleChordHint" class="text-[11px] font-mono text-neon-seventh">Diatonic: Dm7</span>
-          </div>
-
-          <!-- Category A: 7 Church Modes -->
-          <div>
-            <div class="text-[11px] font-bold text-slate-400 mb-1.5">■ 7つのチャーチモード（教会旋法 / ダイアトニック）</div>
-            <div id="churchScaleSelectorGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"></div>
-          </div>
-
-          <!-- Category B: Jazz / Melodic Minor / Diminished Scales -->
-          <div>
-            <div class="text-[11px] font-bold text-neon-char mb-1.5">■ メロディックマイナー派生 ＆ ディミニッシュ系（実戦5スケール）</div>
-            <div id="jazzScaleSelectorGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"></div>
-          </div>
+      <!-- Setlist Top Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-studio-border pb-2">
+        <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 shrink-0">🎵 セットリスト:</span>
+          <select id="songSelectDropdown" onchange="selectSong(this.value)" class="bg-studio-bg border border-studio-border rounded-lg px-2.5 py-1 text-xs font-bold text-slate-100 focus:outline-none focus:border-neon-third">
+            <!-- Populated by JS -->
+          </select>
         </div>
 
-        <!-- Quick Save to Active Setlist Button -->
-        <div class="pt-2 border-t border-studio-border flex items-center justify-between gap-2">
-          <div class="text-[11px] text-slate-400">
-            現在の <strong id="quickSavePreview" class="text-slate-200 font-mono">D Dorian</strong> を右の曲セクションに登録
-          </div>
-          <button onclick="addCurrentStateAsSection()" class="px-3 py-1.5 rounded-lg bg-studio-panelLight hover:bg-slate-700 text-neon-third border border-studio-border text-xs font-bold flex items-center gap-1.5 transition shrink-0">
-            <span>＋ セクション追加</span>
-          </button>
+        <div class="flex items-center gap-1">
+          <button onclick="openNewSongModal()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] font-semibold text-slate-200 transition">＋新規曲</button>
+          <button onclick="renameCurrentSong()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] text-slate-300 transition">名前変更</button>
+          <button onclick="resetDefaultPresets()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] text-slate-400 hover:text-white transition">初期化</button>
+          <button onclick="deleteCurrentSong()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-rose-950/60 border border-studio-border text-[11px] text-rose-400 transition">🗑</button>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN (6 cols): LIVE SETLIST & SONG SECTION PADS -->
-      <div class="lg:col-span-6 bg-studio-panel border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-3 shadow-md">
-        
-        <!-- Song Selector & Setlist Management Top Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-studio-border pb-2">
-          <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
-            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 shrink-0">🎵 セットリスト:</span>
-            <select id="songSelectDropdown" onchange="selectSong(this.value)" class="bg-studio-bg border border-studio-border rounded-lg px-2.5 py-1 text-xs font-bold text-slate-100 focus:outline-none focus:border-neon-third">
-            </select>
-          </div>
-
-          <div class="flex items-center gap-1">
-            <button onclick="openNewSongModal()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] font-semibold text-slate-200 transition">＋ 新規曲</button>
-            <button onclick="renameCurrentSong()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] font-semibold text-slate-300 transition">曲名変更</button>
-            <button onclick="resetDefaultPresets()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-slate-700 border border-studio-border text-[11px] text-slate-400 hover:text-white transition">初期化</button>
-            <button onclick="deleteCurrentSong()" class="px-2 py-1 rounded bg-studio-panelLight hover:bg-rose-950/60 border border-studio-border text-[11px] text-rose-400 transition">🗑</button>
-          </div>
-        </div>
-
-        <!-- Section Pads Grid -->
-        <div class="flex-grow">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[11px] text-slate-400">
-              数字キー <kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono text-slate-300">1</kbd>〜<kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono text-slate-300">9</kbd> / <kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono text-slate-300">Space</kbd> で切替
-            </span>
-            <button onclick="updateActiveSectionWithCurrentFretboard()" class="text-[11px] text-neon-fifth hover:underline font-medium">
-              ↻ 選択中パッドに上書き
-            </button>
-          </div>
-
-          <div id="sectionPadsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1"></div>
-        </div>
-
-        <!-- Foot-Switch Style Prev / Next Navigation Bar -->
-        <div class="grid grid-cols-2 gap-2.5 pt-2 border-t border-studio-border">
-          <button onclick="stepSection(-1)" class="py-2 px-3 rounded-xl bg-studio-bg hover:bg-studio-panelLight active:scale-[0.99] border border-studio-border hover:border-slate-500 flex items-center justify-center gap-2 transition group">
-            <span class="text-sm text-slate-400 group-hover:text-white transition">◀</span>
-            <div class="text-left">
-              <span class="block text-xs font-extrabold text-slate-200">PREV SECTION</span>
-              <span class="block text-[10px] font-mono text-slate-400">前へ [←]</span>
-            </div>
-          </button>
-
-          <button onclick="stepSection(1)" class="py-2 px-3 rounded-xl bg-studio-panelLight hover:bg-slate-700 active:scale-[0.99] border border-neon-third/40 flex items-center justify-center gap-2 transition group">
-            <div class="text-right">
-              <span class="block text-xs font-extrabold text-slate-100">NEXT SECTION</span>
-              <span class="block text-[10px] font-mono text-neon-third">次へ [Space / →]</span>
-            </div>
-            <span class="text-sm text-neon-third group-hover:translate-x-0.5 transition">▶</span>
+      <!-- Section Pads -->
+      <div class="flex-grow">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[11px] text-slate-400">
+            パッド（またはキーボード <kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono">1</kbd>〜<kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono">9</kbd> / <kbd class="px-1 py-0.5 bg-studio-bg border border-studio-border rounded text-[10px] font-mono">Space</kbd>）で瞬時切替
+          </span>
+          <button onclick="updateActiveSectionWithCurrentFretboard()" class="text-[11px] text-neon-fifth hover:underline font-medium">
+            ↻ 選択中パッドに上書き
           </button>
         </div>
 
+        <div id="sectionPadsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[250px] overflow-y-auto pr-1">
+          <!-- Populated by JS -->
+        </div>
       </div>
+
+      <!-- Prev / Next Foot-Switch Bar -->
+      <div class="grid grid-cols-2 gap-2.5 pt-2 border-t border-studio-border">
+        <button onclick="stepSection(-1)" class="py-2 px-3 rounded-xl bg-studio-bg hover:bg-studio-panelLight border border-studio-border flex items-center justify-center gap-2 transition">
+          <span class="text-sm text-slate-400">◀</span>
+          <div class="text-left">
+            <span class="block text-xs font-extrabold text-slate-200">PREV SECTION</span>
+            <span class="block text-[10px] font-mono text-slate-400">前へ [← キー]</span>
+          </div>
+        </button>
+
+        <button onclick="stepSection(1)" class="py-2 px-3 rounded-xl bg-studio-panelLight hover:bg-slate-700 border border-neon-third/40 flex items-center justify-center gap-2 transition">
+          <div class="text-right">
+            <span class="block text-xs font-extrabold text-slate-100">NEXT SECTION</span>
+            <span class="block text-[10px] font-mono text-neon-third">次へ [Space / →]</span>
+          </div>
+          <span class="text-sm text-neon-third">▶</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
-  <!-- MODAL: ADD / EDIT SONG OR SECTION NAME -->
+  <!-- MODAL: DIALOG -->
   <div id="dialogModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-studio-panel border border-studio-border rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <h3 id="dialogTitle" class="text-base font-bold text-white mb-2">セクション名の編集</h3>
-      <p id="dialogSubtitle" class="text-xs text-slate-400 mb-3">Aメロ、サビ、2-5-1ソロなど分かりやすい名前を入力してください。</p>
-      <input id="dialogInput" type="text" class="w-full bg-studio-bg border border-studio-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neon-third mb-4" placeholder="例: [サビ] E♭ Major">
+      <p id="dialogSubtitle" class="text-xs text-slate-400 mb-3">名前を入力してください。</p>
+      <input id="dialogInput" type="text" class="w-full bg-studio-bg border border-studio-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neon-third mb-4">
       <div class="flex justify-end gap-2">
         <button onclick="closeDialogModal()" class="px-4 py-1.5 rounded-lg bg-studio-panelLight text-slate-300 text-xs font-semibold hover:bg-slate-700">キャンセル</button>
         <button id="dialogConfirmBtn" class="px-4 py-1.5 rounded-lg bg-neon-third text-slate-950 text-xs font-bold hover:brightness-110">保存する</button>
@@ -474,19 +499,16 @@
     </div>
   </div>
 
-  <!-- MODAL: WEB MIDI FOOT CONTROLLER CONFIG -->
+  <!-- MODAL: WEB MIDI -->
   <div id="midiModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-studio-panel border border-studio-border rounded-2xl max-w-lg w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <span>🎛️ Web MIDI フットペダル連携</span>
-        </h3>
+        <h3 class="text-base font-bold text-white">🎛️ Web MIDI フットペダル連携</h3>
         <button onclick="closeMidiModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
       </div>
       <p class="text-xs text-slate-300 leading-relaxed mb-3">
-        BluetoothやUSBのMIDIフットスイッチャー（M-VAVE Chocolate等）やMIDIキーボードを接続し、ペダルを踏んでハンズフリーで「次のセクション / 前のセクション」を切り替えられます。
+        MIDIフットスイッチャー等を接続し、足元でセクションを切り替えられます。
       </p>
-
       <div class="bg-studio-bg border border-studio-border rounded-xl p-3 mb-4 text-xs space-y-2">
         <div class="flex justify-between items-center">
           <span class="text-slate-400">接続ステータス:</span>
@@ -497,29 +519,26 @@
           <span id="midiLastMessage" class="font-mono text-slate-200">なし</span>
         </div>
       </div>
-
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-studio-panelLight border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-2">
           <div>
-            <span class="text-xs font-bold text-white block">◀ PREV SECTION ペダル</span>
+            <span class="text-xs font-bold text-white block">◀ PREV ペダル</span>
             <span id="midiPrevBindText" class="text-[11px] font-mono text-neon-third">未割当</span>
           </div>
           <button onclick="startMidiLearn('prev')" id="btnLearnPrev" class="w-full py-1.5 rounded bg-studio-bg hover:bg-slate-800 border border-studio-border text-xs font-semibold text-slate-200 transition">
-            MIDI Learn (待機開始)
+            MIDI Learn
           </button>
         </div>
-
         <div class="bg-studio-panelLight border border-studio-border rounded-xl p-3 flex flex-col justify-between gap-2">
           <div>
-            <span class="text-xs font-bold text-white block">NEXT SECTION ▶ ペダル</span>
+            <span class="text-xs font-bold text-white block">NEXT ▶ ペダル</span>
             <span id="midiNextBindText" class="text-[11px] font-mono text-neon-third">未割当</span>
           </div>
           <button onclick="startMidiLearn('next')" id="btnLearnNext" class="w-full py-1.5 rounded bg-studio-bg hover:bg-slate-800 border border-studio-border text-xs font-semibold text-slate-200 transition">
-            MIDI Learn (待機開始)
+            MIDI Learn
           </button>
         </div>
       </div>
-
       <div class="flex justify-between items-center">
         <button onclick="clearMidiBindings()" class="text-xs text-rose-400 hover:underline">割当をリセット</button>
         <button onclick="closeMidiModal()" class="px-4 py-1.5 rounded-lg bg-neon-third text-slate-950 text-xs font-bold">閉じる</button>
@@ -527,10 +546,9 @@
     </div>
   </div>
 
-  <!-- APPLICATION LOGIC -->
   <script>
     /*************************************************************************
-     * 1. MUSIC THEORY DATA: THE 7 CHURCH MODES, CHARACTERISTIC & AVOID NOTES
+     * 1. EXACT MUSIC THEORY DATA: 7 CHURCH MODES + 5 JAZZ / OUT SCALES
      *************************************************************************/
     const NOTES = [
       { id: 0, sharp: 'C', flat: 'C', label: 'C' },
@@ -557,23 +575,6 @@
       { stringNum: 6, name: '6E', pitchClass: 4, midiBase: 40, thickness: 4.0, wound: true }
     ];
 
-    // Semitone interval metadata (0 to 11) with Church Mode degree names
-    const INTERVAL_META = {
-      0:  { name: 'R',  role: 'root' },
-      1:  { name: 'b2', role: 'scale' },
-      2:  { name: '2',  role: 'scale' },
-      3:  { name: 'b3', role: 'third' },
-      4:  { name: '3',  role: 'third' },
-      5:  { name: '4',  role: 'scale' },
-      6:  { name: '#4/b5', role: 'scale' },
-      7:  { name: '5',  role: 'fifth' },
-      8:  { name: 'b6', role: 'scale' },
-      9:  { name: '6',  role: 'scale' },
-      10: { name: 'b7', role: 'seventh' },
-      11: { name: 'M7', role: 'seventh' }
-    };
-
-    // Ordered list of the 7 Church Modes for Relative Mode calculation
     const CHURCH_MODE_ORDER = [
       'ionian',
       'dorian',
@@ -584,18 +585,17 @@
       'locrian'
     ];
 
-    // Ordered list of the 5 Jazz / Melodic Minor / Symmetrical Diminished Scales
-    const JAZZ_SCALE_ORDER = [
+    const JAZZ_OUT_SCALE_ORDER = [
       'melodic_minor',
       'lydian_b7',
       'altered',
-      'com_dim',
-      'wh_dim'
+      'con_dimi',
+      'wh_dimi'
     ];
 
-    // Complete Scale Database (7 Church Modes + 5 Jazz/Symmetrical Scales)
-    // Every semitone interval (0..11) and its exact theoretical degree label is verified.
+    // Complete Scale Database with exact semitone intervals, custom degree labels, roles, characteristic & avoid notes
     const SCALES = {
+      // --- 7 CHURCH MODES ---
       ionian: {
         id: 'ionian',
         category: 'church',
@@ -603,14 +603,14 @@
         degreeOffsetFromParent: 0,
         name: 'Ⅰ Ionian (アイオニアン)',
         shortName: 'Ⅰ Ionian',
-        jpSub: 'メジャースケール / 王道・明朗',
+        jpSub: '自然長音階 / 王道メジャー',
         intervals: [0, 2, 4, 5, 7, 9, 11],
-        degreeMap: { 0: 'R', 2: '2', 4: '3', 5: '4', 7: '5', 9: '6', 11: 'M7' },
-        roleMap:   { 0: 'root', 2: 'scale', 4: 'third', 5: 'scale', 7: 'fifth', 9: 'scale', 11: 'seventh' },
+        degreeMap: { 0:'R', 2:'2', 4:'3', 5:'4', 7:'5', 9:'6', 11:'M7' },
+        roleMap:   { 0:'root', 2:'scale', 4:'third', 5:'scale', 7:'fifth', 9:'scale', 11:'seventh' },
         charSemitones: [11],
         avoidSemitones: [5],
-        charLabel: 'M7 (⚠️Avoid: 4)',
-        flavorDesc: '王道のメジャースケール。4度(P4)は長3度(M3)と半音でぶつかるアヴォイドのため控えめに表示しています',
+        charLabel: 'M7 (⚠️Avoid:4)',
+        flavorDesc: '王道のメジャースケール。4度(P4)はM3と半音でぶつかるため控えめ表示',
         chordSuffix: 'Maj7',
         chords: 'Maj7, Maj9, 6',
         useFlats: false
@@ -624,12 +624,12 @@
         shortName: 'Ⅱ Dorian',
         jpSub: 'm7系 / 都会的・クール (★M6)',
         intervals: [0, 2, 3, 5, 7, 9, 10],
-        degreeMap: { 0: 'R', 2: '2', 3: 'b3', 5: '4', 7: '5', 9: '6', 10: 'b7' },
-        roleMap:   { 0: 'root', 2: 'scale', 3: 'third', 5: 'scale', 7: 'fifth', 9: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 2:'2', 3:'b3', 5:'4', 7:'5', 9:'6', 10:'b7' },
+        roleMap:   { 0:'root', 2:'scale', 3:'third', 5:'scale', 7:'fifth', 9:'scale', 10:'seventh' },
         charSemitones: [9],
         avoidSemitones: [],
         charLabel: 'M6 (長6度)',
-        flavorDesc: 'ナチュラルマイナーの暗いb6を半音上げた「M6（長6度）」が特性音。実質アヴォイドがなく都会的なマイナー',
+        flavorDesc: 'マイナーながら明るい「M6(長6度)」が特性音。実質アヴォイドなしの万能マイナー',
         chordSuffix: 'm7',
         chords: 'm7, m9, m11, m6',
         useFlats: true
@@ -641,16 +641,16 @@
         degreeOffsetFromParent: 4,
         name: 'Ⅲ Phrygian (フリジアン)',
         shortName: 'Ⅲ Phrygian',
-        jpSub: 'm7(b9)系 / スパニッシュ・情熱 (★b2)',
+        jpSub: 'm7(b9)系 / スパニッシュ (★b2)',
         intervals: [0, 1, 3, 5, 7, 8, 10],
-        degreeMap: { 0: 'R', 1: 'b2', 3: 'b3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
-        roleMap:   { 0: 'root', 1: 'scale', 3: 'third', 5: 'scale', 7: 'fifth', 8: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 1:'b2', 3:'b3', 5:'4', 7:'5', 8:'b6', 10:'b7' },
+        roleMap:   { 0:'root', 1:'scale', 3:'third', 5:'scale', 7:'fifth', 8:'scale', 10:'seventh' },
         charSemitones: [1],
         avoidSemitones: [8],
-        charLabel: 'b2 (⚠️Avoid: b6)',
-        flavorDesc: 'ルートの半音上の「b2（短2度）」が特性音。b6はm7コードを濁らせるため控えめに表示しています',
+        charLabel: 'b2 (⚠️Avoid:b6)',
+        flavorDesc: 'ルートの半音上の「b2(短2度)」が情熱的な特性音。b6はm7上で濁るため控えめ表示',
         chordSuffix: 'm7',
-        chords: 'm7, Fm/E, Esus4(b9)',
+        chords: 'm7, Esus4(b9)',
         useFlats: true
       },
       lydian: {
@@ -660,16 +660,16 @@
         degreeOffsetFromParent: 5,
         name: 'Ⅳ Lydian (リディアン)',
         shortName: 'Ⅳ Lydian',
-        jpSub: 'Maj7(#11)系 / 浮遊感・神秘的 (★#4)',
+        jpSub: 'Maj7(#11) / 浮遊感・神秘的 (★#4)',
         intervals: [0, 2, 4, 6, 7, 9, 11],
-        degreeMap: { 0: 'R', 2: '2', 4: '3', 6: '#4', 7: '5', 9: '6', 11: 'M7' },
-        roleMap:   { 0: 'root', 2: 'scale', 4: 'third', 6: 'scale', 7: 'fifth', 9: 'scale', 11: 'seventh' },
+        degreeMap: { 0:'R', 2:'2', 4:'3', 6:'#4', 7:'5', 9:'6', 11:'M7' },
+        roleMap:   { 0:'root', 2:'scale', 4:'third', 6:'scale', 7:'fifth', 9:'scale', 11:'seventh' },
         charSemitones: [6],
         avoidSemitones: [],
-        charLabel: '#4 (アヴォイドなし)',
-        flavorDesc: '4度を半音上げた「#4（#11）」が特性音。アヴォイドノートが1つも存在せず、どの音を伸ばしても美しい旋法',
+        charLabel: '#4 (Avoidなし)',
+        flavorDesc: '4度を半音上げた「#4(#11)」が特性音。アヴォイドが一切ない美しいメジャー旋法',
         chordSuffix: 'Maj7(#11)',
-        chords: 'Maj7(#11), Maj9(#11), D/C',
+        chords: 'Maj7(#11), Maj9(#11)',
         useFlats: false
       },
       mixolydian: {
@@ -681,14 +681,14 @@
         shortName: 'Ⅴ Mixolydian',
         jpSub: 'Dom7系 / ブルージー・ロック (★b7)',
         intervals: [0, 2, 4, 5, 7, 9, 10],
-        degreeMap: { 0: 'R', 2: '2', 4: '3', 5: '4', 7: '5', 9: '6', 10: 'b7' },
-        roleMap:   { 0: 'root', 2: 'scale', 4: 'third', 5: 'scale', 7: 'fifth', 9: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 2:'2', 4:'3', 5:'4', 7:'5', 9:'6', 10:'b7' },
+        roleMap:   { 0:'root', 2:'scale', 4:'third', 5:'scale', 7:'fifth', 9:'scale', 10:'seventh' },
         charSemitones: [10],
         avoidSemitones: [5],
-        charLabel: 'b7 (⚠️Avoid: 4)',
-        flavorDesc: 'M3とb7が共存するロック・ブルースの要。4度(P4)は3度と半音でぶつかるアヴォイドのため控えめ表示',
+        charLabel: 'b7 (⚠️Avoid:4)',
+        flavorDesc: 'M3とb7が共存するドミナントの基本。4度(P4)は3度とぶつかるため控えめ表示',
         chordSuffix: '7',
-        chords: '7, 9, 13, Bb/C',
+        chords: '7, 9, 13',
         useFlats: true
       },
       aeolian: {
@@ -698,14 +698,14 @@
         degreeOffsetFromParent: 9,
         name: 'Ⅵ Aeolian (エオリアン)',
         shortName: 'Ⅵ Aeolian',
-        jpSub: 'ナチュラルマイナー / 哀愁・叙情的 (★b6)',
+        jpSub: '自然短音階 / 哀愁マイナー (★b6)',
         intervals: [0, 2, 3, 5, 7, 8, 10],
-        degreeMap: { 0: 'R', 2: '2', 3: 'b3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
-        roleMap:   { 0: 'root', 2: 'scale', 3: 'third', 5: 'scale', 7: 'fifth', 8: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 2:'2', 3:'b3', 5:'4', 7:'5', 8:'b6', 10:'b7' },
+        roleMap:   { 0:'root', 2:'scale', 3:'third', 5:'scale', 7:'fifth', 8:'scale', 10:'seventh' },
         charSemitones: [8],
         avoidSemitones: [8],
-        charLabel: 'b6 (短6度・要配慮)',
-        flavorDesc: '純粋な自然的短音階。b6はエオリアンの哀愁の源ですが、5度と半音でぶつかるため経過音的な扱いが効果的',
+        charLabel: 'b6 (短6度)',
+        flavorDesc: 'ナチュラルマイナー。b6は哀愁の特性音ですが5度と半音関係のため伸ばしすぎに注意',
         chordSuffix: 'm7',
         chords: 'm7, m9, m(b6)',
         useFlats: true
@@ -719,139 +719,132 @@
         shortName: 'Ⅶ Locrian',
         jpSub: 'm7(b5)系 / ハーフディミニッシュ (★b5)',
         intervals: [0, 1, 3, 5, 6, 8, 10],
-        degreeMap: { 0: 'R', 1: 'b2', 3: 'b3', 5: '4', 6: 'b5', 8: 'b6', 10: 'b7' },
-        roleMap:   { 0: 'root', 1: 'scale', 3: 'third', 5: 'scale', 6: 'fifth', 8: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 1:'b2', 3:'b3', 5:'4', 6:'b5', 8:'b6', 10:'b7' },
+        roleMap:   { 0:'root', 1:'scale', 3:'third', 5:'scale', 6:'fifth', 8:'scale', 10:'seventh' },
         charSemitones: [6],
         avoidSemitones: [1],
-        charLabel: 'b5 (⚠️Avoid: b2)',
-        flavorDesc: 'm7(b5)に対応する旋法。「b5」がコードトーン兼特性音で、ルートとぶつかる「b2」は控えめに表示しています',
+        charLabel: 'b5 (⚠️Avoid:b2)',
+        flavorDesc: 'マイナーツーファイブのⅡm7(b5)用。「b5」が特性音兼コードトーン',
         chordSuffix: 'm7(b5)',
         chords: 'm7(b5), m7b5(11)',
         useFlats: true
       },
 
-      /* === 5 NEW JAZZ / MELODIC MINOR / SYMMETRICAL SCALES === */
+      // --- 5 JAZZ / FUSION / OUT SCALES ---
       melodic_minor: {
         id: 'melodic_minor',
-        category: 'jazz',
+        category: 'jazz_out',
         roman: 'mM7',
-        degreeOffsetFromParent: 0,
+        melodicMinorOffset: 0, // Parent Melodic Minor is itself
         name: 'Melodic Minor (メロディックマイナー)',
         shortName: 'Melodic Minor',
-        jpSub: 'mMaj7系 / ジャズマイナー (1,2,b3,4,5,6,M7)',
-        // Semitones: 0(R), 2(2), 3(b3), 5(4), 7(5), 9(6), 11(M7)
+        jpSub: 'ジャズマイナー (R, 2, b3, 4, 5, 6, M7)',
         intervals: [0, 2, 3, 5, 7, 9, 11],
-        degreeMap: { 0: 'R', 2: '2', 3: 'b3', 5: '4', 7: '5', 9: '6', 11: 'M7' },
-        roleMap:   { 0: 'root', 2: 'scale', 3: 'third', 5: 'scale', 7: 'fifth', 9: 'seventh', 11: 'seventh' },
-        charSemitones: [9, 11], // M6 and M7 over minor 3rd
+        degreeMap: { 0:'R', 2:'2', 3:'b3', 5:'4', 7:'5', 9:'6', 11:'M7' },
+        roleMap:   { 0:'root', 2:'scale', 3:'third', 5:'scale', 7:'fifth', 9:'scale', 11:'seventh' },
+        charSemitones: [9, 11], // M6 and M7 over b3 minor
         avoidSemitones: [],
-        charLabel: '6, M7 (アヴォイドなし)',
-        flavorDesc: 'メジャースケールの3度だけを半音下げた「ジャズ・マイナー」。b3でありながら長6度(6)と長7度(M7)を持ち、アヴォイドがありません',
+        charLabel: '6 & M7 (b3+M7)',
+        flavorDesc: 'マイナー(b3)でありながら後半がメジャーと同じ「6・M7」を持つジャズ・フュージョン最重要音階。オルタードやリディアンb7の親スケール',
         chordSuffix: 'mMaj7',
         chords: 'mMaj7, m6, mMaj9',
         useFlats: true
       },
       lydian_b7: {
         id: 'lydian_b7',
-        category: 'jazz',
-        roman: 'ⅣmM',
-        degreeOffsetFromParent: 5, // 4th mode of Melodic Minor (e.g., C Lydian b7 = G Melodic Minor)
-        name: 'Lydian ♭7 (リディアンフラットセブンス)',
+        category: 'jazz_out',
+        roman: 'Ⅳ7',
+        melodicMinorOffset: 5, // 4th mode of Melodic Minor (Parent Melodic Minor is Perfect 5th above = -5 semitones)
+        name: 'Lydian ♭7 (リディアンフラット7th)',
         shortName: 'Lydian ♭7',
-        jpSub: '7(#11) / 裏コード・非解決Dom7 (1,2,3,#11,5,13,b7)',
-        // Semitones: 0(R), 2(9), 4(3), 6(#11), 7(5), 9(13), 10(b7)
+        jpSub: '裏コード・非解決7th (R, 9, 3, #11, 5, 13, b7)',
         intervals: [0, 2, 4, 6, 7, 9, 10],
-        degreeMap: { 0: 'R', 2: '9', 4: '3', 6: '#11', 7: '5', 9: '13', 10: 'b7' },
-        roleMap:   { 0: 'root', 2: 'scale', 4: 'third', 6: 'scale', 7: 'fifth', 9: 'scale', 10: 'seventh' },
+        degreeMap: { 0:'R', 2:'9', 4:'3', 6:'#11', 7:'5', 9:'13', 10:'b7' },
+        roleMap:   { 0:'root', 2:'scale', 4:'third', 6:'scale', 7:'fifth', 9:'scale', 10:'seventh' },
         charSemitones: [6, 10], // #11 and b7
         avoidSemitones: [],
-        charLabel: '#11, b7 (5度上メロマイナー)',
-        flavorDesc: 'メロディックマイナーの第4モード（完全5度上のメロディックマイナーと同構成音）。裏コードの7thやトニック以外のDom7(#11)で必須',
+        charLabel: '#11 & b7',
+        flavorDesc: '完全5度上のメロディックマイナーと同じ構成音。裏コード(SubV7)やトニックに戻らない7thコードで抜群に洗練された響きになります',
         chordSuffix: '7(#11)',
         chords: '7(#11), 9(#11), 13(#11)',
         useFlats: true
       },
       altered: {
         id: 'altered',
-        category: 'jazz',
-        roman: 'ⅦmM',
-        degreeOffsetFromParent: 11, // 7th mode of Melodic Minor (e.g., G Altered = Ab Melodic Minor)
+        category: 'jazz_out',
+        roman: 'Ⅴ7alt',
+        melodicMinorOffset: 11, // 7th mode of Melodic Minor (Parent Melodic Minor is 1 semitone above = +1 / -11)
         name: 'Altered (オルタードスケール)',
         shortName: 'Altered',
-        jpSub: '7alt / 解決V7緊張感最大化 (R,b9,#9,3,#11,b13,b7)',
-        // Semitones: 0(R), 1(b9), 3(#9), 4(3), 6(#11/b5), 8(b13/#5), 10(b7)
+        jpSub: 'V7最強アウト (R, b9, #9, 3, #11/b5, b13/#5, b7)',
         intervals: [0, 1, 3, 4, 6, 8, 10],
-        degreeMap: { 0: 'R', 1: 'b9', 3: '#9', 4: '3', 6: 'b5', 8: 'b13', 10: 'b7' },
-        roleMap:   { 0: 'root', 1: 'scale', 3: 'scale', 4: 'third', 6: 'fifth', 8: 'fifth', 10: 'seventh' },
+        degreeMap: { 0:'R', 1:'b9', 3:'#9', 4:'3', 6:'b5', 8:'b13', 10:'b7' },
+        roleMap:   { 0:'root', 1:'scale', 3:'scale', 4:'third', 6:'fifth', 8:'scale', 10:'seventh' },
         charSemitones: [1, 3, 6, 8], // All 4 altered tensions: b9, #9, b5(#11), b13(#5)
         avoidSemitones: [],
-        charLabel: 'b9,#9,b5,b13 (半音上メロマイナー)',
-        flavorDesc: 'メロディックマイナーの第7モード（半音上のメロディックマイナーと同構成音）。R・3・b7以外の全音がオルタードテンションで構成されます',
+        charLabel: 'b9, #9, b5, b13',
+        flavorDesc: 'ドミナント7th(G7等)で強烈な緊張感とアウト感を生むスケール。正体は「半音上のメロディックマイナー」であり、裏コードのLydian♭7と全く同じ7音です',
         chordSuffix: '7alt',
         chords: '7alt, 7(b9,#9,b13), 7(#5)',
         useFlats: true
       },
-      com_dim: {
-        id: 'com_dim',
-        category: 'jazz',
+      con_dimi: {
+        id: 'con_dimi',
+        category: 'jazz_out',
         roman: 'H-W',
-        degreeOffsetFromParent: 0,
-        name: 'Con-Dimi (コンディミ / H-W半音-全音)',
+        symmetricalStep: 3, // Repeats every minor 3rd (3 frets)
+        name: 'Con-Dimi (コンディミ / H-W 半音-全音)',
         shortName: 'Con-Dimi (H-W)',
-        jpSub: 'Dom7(b9,13)用8音 / 半音・全音 (R,b9,#9,3,#11,5,13,b7)',
-        // Half-Whole Diminished (8 notes): 0(R), 1(b9), 3(#9), 4(3), 6(#11), 7(5), 9(13), 10(b7)
+        jpSub: '8音対称ドミナント (R, b9, #9, 3, #11, 5, 13, b7)',
         intervals: [0, 1, 3, 4, 6, 7, 9, 10],
-        degreeMap: { 0: 'R', 1: 'b9', 3: '#9', 4: '3', 6: '#11', 7: '5', 9: '13', 10: 'b7' },
-        roleMap:   { 0: 'root', 1: 'scale', 3: 'scale', 4: 'third', 6: 'scale', 7: 'fifth', 9: 'scale', 10: 'seventh' },
-        charSemitones: [1, 3, 6, 9], // b9, #9, #11, and natural 13
+        degreeMap: { 0:'R', 1:'b9', 3:'#9', 4:'3', 6:'#11', 7:'5', 9:'13', 10:'b7' },
+        roleMap:   { 0:'root', 1:'scale', 3:'scale', 4:'third', 6:'scale', 7:'fifth', 9:'scale', 10:'seventh' },
+        charSemitones: [1, 3, 6, 9], // b9, #9, #11 + natural 13
         avoidSemitones: [],
-        charLabel: 'b9,#9,#11,13 (3フレット周期対称)',
-        flavorDesc: 'ルートから「半音→全音」の順で並ぶ8音スケール。完全5度(5)とナチュラル13thを保ったままb9・#9・#11を乗せるドミナント7thの切り札',
+        charLabel: 'b9,#9,#11,13 (3F対称)',
+        flavorDesc: 'ルートから「半音・全音」の順で並ぶ8音スケール。b9/#9/#11とナチュラル5th・13thが共存し、3フレット(短3度)ずらしても全く同じ構成音になる対称構造',
         chordSuffix: '7(b9,13)',
-        chords: '7(b9), 13(b9), 7(#9,13)',
+        chords: '7(b9,13), 7(#9,13), 13(b9)',
         useFlats: true
       },
-      wh_dim: {
-        id: 'wh_dim',
-        category: 'jazz',
+      wh_dimi: {
+        id: 'wh_dimi',
+        category: 'jazz_out',
         roman: 'W-H',
-        degreeOffsetFromParent: 0,
-        name: 'Diminished (ディミニッシュ / W-H全音-半音)',
+        symmetricalStep: 3,
+        name: 'Diminished (ディミニッシュ / W-H 全音-半音)',
         shortName: 'Diminished (W-H)',
-        jpSub: 'dim7コード用8音 / 全音・半音 (R,2,b3,4,b5,b6,dim7,M7)',
-        // Whole-Half Diminished (8 notes): 0(R), 2(2), 3(b3), 5(4), 6(b5), 8(b6), 9(dim7/6), 11(M7)
+        jpSub: 'dim7用8音対称 (R, 2, b3, 4, b5, b6, dim7, M7)',
         intervals: [0, 2, 3, 5, 6, 8, 9, 11],
-        degreeMap: { 0: 'R', 2: '2', 3: 'b3', 5: '4', 6: 'b5', 8: 'b6', 9: 'dim7', 11: 'M7' },
-        roleMap:   { 0: 'root', 2: 'scale', 3: 'third', 5: 'scale', 6: 'fifth', 8: 'scale', 9: 'seventh', 11: 'scale' },
-        charSemitones: [6, 9, 11], // b5, dim7(bb7), M7
+        degreeMap: { 0:'R', 2:'2', 3:'b3', 5:'4', 6:'b5', 8:'b6', 9:'dim7', 11:'M7' },
+        roleMap:   { 0:'root', 2:'scale', 3:'third', 5:'scale', 6:'fifth', 8:'scale', 9:'seventh', 11:'scale' },
+        charSemitones: [6, 9, 11], // b5, dim7(bb7=9), M7
         avoidSemitones: [],
-        charLabel: 'b5,dim7,M7 (dim7構成音+半音上)',
-        flavorDesc: 'ルートから「全音→半音」の順で並ぶ8音スケール。dim7コードの4音（R, b3, b5, dim7）それぞれに全音上のテンションが加わる対称構造です',
+        charLabel: 'b5, dim7 (3F対称)',
+        flavorDesc: 'ルートから「全音・半音」の順で並ぶ本来のディミニッシュスケール。パッシングディミニッシュ(C#dim7等)で3フレットごとに同じ形を平行移動できます',
         chordSuffix: 'dim7',
-        chords: 'dim7, dim(Maj7)',
+        chords: 'dim7, °7',
         useFlats: true
       }
     };
 
     /*************************************************************************
-     * 2. APPLICATION STATE & PRESET SONGS
+     * 2. APPLICATION STATE & PRACTICAL OUT-SCALE SETLIST PRESETS
      *************************************************************************/
     const DEFAULT_SETLIST = [
       {
-        id: 'song-cm-1',
-        title: '1. [ジャズ実戦 II-V-I] Dドリアン → Gオルタード/コンディミ → Cリディアン',
+        id: 'song-out-1',
+        title: '1. [Key=C 実践アウト] Ⅱ-Ⅴ-ⅠでG7オルタード & コンディミを使う',
         sections: [
-          { name: 'Ⅱm7: D Dorian (Dm7)', root: 2, scale: 'dorian' },
-          { name: 'Ⅴ7alt: G Altered (G7alt=Abメロマイ)', root: 7, scale: 'altered' },
-          { name: 'Ⅴ7(b9,13): G Con-Dimi (G7b9)', root: 7, scale: 'com_dim' },
-          { name: '裏Ⅴ7: Db Lydian b7 (Db7#11)', root: 1, scale: 'lydian_b7' },
-          { name: 'ⅠMaj7: C Ionian (CMaj7)', root: 0, scale: 'ionian' },
-          { name: 'ⅠMaj7(#11): C Lydian (CMaj7#11)', root: 0, scale: 'lydian' },
-          { name: '#Ⅰdim7: C# Diminished W-H (C#dim7)', root: 1, scale: 'wh_dim' }
+          { name: 'Ⅱm7: D Dorian (インサイド)', root: 2, scale: 'dorian' },
+          { name: '🔥Ⅴ7: G Altered (G7でアウト!)', root: 7, scale: 'altered' },
+          { name: '🏠ⅠMaj7: C Ionian (トニック解決)', root: 0, scale: 'ionian' },
+          { name: '⚡Ⅴ7別解: G Con-Dimi (コンディミ)', root: 7, scale: 'con_dimi' },
+          { name: '🔄Ⅴ7裏コード: Db Lydian ♭7', root: 1, scale: 'lydian_b7' }
         ]
       },
       {
-        id: 'song-cm-2',
+        id: 'song-cm-1',
         title: '2. [平行調の仕組み] 親Key=Cメジャーの7つのチャーチモード順送り',
         sections: [
           { name: 'Ⅰ度: C Ionian (CMaj7)', root: 0, scale: 'ionian' },
@@ -864,38 +857,39 @@
         ]
       },
       {
-        id: 'song-cm-3',
-        title: '3. [実戦曲進行] 名曲モーダル・ヴァンプ集 (So What / Spain / Blue Dream)',
+        id: 'song-mm-1',
+        title: '3. [メロディックマイナー活用] 同主調マイナー比較 & パッシングdim7',
         sections: [
-          { name: '[So What A] D Dorian (Dm7)', root: 2, scale: 'dorian' },
-          { name: '[So What B] Eb Dorian (半音上転調)', root: 3, scale: 'dorian' },
-          { name: '[Nardis / 情熱系] E Phrygian', root: 4, scale: 'phrygian' },
-          { name: '[Minor Tonic] A Melodic Minor (AmMaj7)', root: 9, scale: 'melodic_minor' },
-          { name: '[Flying In A Blue Dream] C Lydian', root: 0, scale: 'lydian' }
+          { name: '① A Aeolian (ナチュラルマイナー)', root: 9, scale: 'aeolian' },
+          { name: '② A Dorian (★M6 都会的マイナー)', root: 9, scale: 'dorian' },
+          { name: '③ A Melodic Minor (★6 & M7)', root: 9, scale: 'melodic_minor' },
+          { name: '④ G# Diminished W-H (G#dim7→Am)', root: 8, scale: 'wh_dimi' },
+          { name: '⑤ E Altered (E7alt→Am解決)', root: 4, scale: 'altered' }
         ]
       }
     ];
 
     let state = {
-      root: 2,                  // Default: D
-      scale: 'dorian',          // key of SCALES
+      homeKey: 0,               // Locked Song Key (e.g., 0 = C) for 1-Tap Out Launcher
+      root: 0,                  // Currently displayed Root Note on Fretboard
+      scale: 'ionian',          // Currently displayed Scale ID
       fretCount: 24,            // 22 or 24
-      playerPov: true,          // true = 1st string on top, false = 6th string on top
+      playerPov: true,          // true = 1st string on top
       labelMode: 'interval',    // 'interval' or 'note'
       filterMode: 'all',        // 'all', 'safe', 'char_focus', 'chord'
       avoidDisplay: 'dim',      // 'dim' or 'hide'
       zoneFilter: 'all',        // 'all', 'low', 'mid', 'high', 'upper'
-      focusMode: false,         // true = hide lower workspace for mobile landscape
+      compactMode: false,       // true = Hides lower panels for mobile landscape Key+Fretboard focus
       audioEnabled: true,
       setlist: [],
-      activeSongId: 'song-cm-1',
+      activeSongId: 'song-out-1',
       activeSectionIndex: 0,
       midiLearnTarget: null,
       midiBindings: { prev: null, next: null }
     };
 
     /*************************************************************************
-     * 3. WEB AUDIO API GUITAR PLUCK SYNTHESIZER & MODAL AUDITION
+     * 3. WEB AUDIO API GUITAR PLUCK SYNTHESIZER
      *************************************************************************/
     let audioCtx = null;
 
@@ -909,7 +903,7 @@
       }
     }
 
-    function playGuitarTone(midiNote, elementToAnimate, customDuration = 1.15, gainLevel = 0.25) {
+    function playGuitarTone(midiNote, elementToAnimate, customDuration = 1.1, gainLevel = 0.24) {
       if (elementToAnimate) {
         elementToAnimate.classList.remove('plucked');
         void elementToAnimate.offsetWidth;
@@ -933,9 +927,9 @@
         osc2.frequency.setValueAtTime(freq * 1.002, now);
 
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(freq * 5.5, now);
-        filter.frequency.exponentialRampToValueAtTime(freq * 1.4, now + 0.35);
-        filter.Q.setValueAtTime(2.5, now);
+        filter.frequency.setValueAtTime(freq * 5.2, now);
+        filter.frequency.exponentialRampToValueAtTime(freq * 1.35, now + 0.35);
+        filter.Q.setValueAtTime(2.2, now);
 
         gain.gain.setValueAtTime(0.001, now);
         gain.gain.linearRampToValueAtTime(gainLevel, now + 0.012);
@@ -951,35 +945,32 @@
         osc1.stop(now + customDuration + 0.05);
         osc2.stop(now + customDuration + 0.05);
       } catch (e) {
-        console.warn('Web Audio playback failed:', e);
+        console.warn('Web Audio error:', e);
       }
     }
 
-    // Play the modal chord voicing + characteristic note highlight
     function playCurrentModeAudition() {
       if (!state.audioEnabled) {
         toggleAudioMute();
       }
-      const scaleObj = SCALES[state.scale] || SCALES.dorian;
-      const baseMidi = 48 + state.root; // C3..B3 range
+      const scaleObj = SCALES[state.scale] || SCALES.ionian;
+      const baseMidi = 48 + state.root;
 
-      // Pick 3rd, 5th, 7th from roleMap or intervals
-      const thirdSemi = scaleObj.intervals.find(s => scaleObj.roleMap[s] === 'third') ?? scaleObj.intervals[2];
-      const fifthSemi = scaleObj.intervals.find(s => scaleObj.roleMap[s] === 'fifth') ?? scaleObj.intervals[4];
-      const seventhSemi = scaleObj.intervals.find(s => scaleObj.roleMap[s] === 'seventh') ?? scaleObj.intervals[scaleObj.intervals.length - 1];
-      const charSemi = (scaleObj.charSemitones[0] ?? scaleObj.intervals[1]) + 12;
+      // Play scale arpeggio / characteristic flavor tones
+      const auditionSemitones = [0];
+      scaleObj.intervals.forEach(semi => {
+        const r = scaleObj.roleMap[semi];
+        if (r === 'third' || r === 'fifth' || r === 'seventh') {
+          auditionSemitones.push(semi);
+        }
+      });
+      if (scaleObj.charSemitones.length > 0) {
+        auditionSemitones.push(scaleObj.charSemitones[0] + 12);
+      }
 
-      const chordNotes = [
-        baseMidi,
-        baseMidi + fifthSemi,
-        baseMidi + seventhSemi,
-        baseMidi + 12 + thirdSemi,
-        baseMidi + charSemi
-      ];
-
-      chordNotes.forEach((midi, idx) => {
+      auditionSemitones.forEach((semi, idx) => {
         setTimeout(() => {
-          playGuitarTone(midi, null, 1.8, idx === chordNotes.length - 1 ? 0.32 : 0.16);
+          playGuitarTone(baseMidi + semi, null, 1.6, idx === auditionSemitones.length - 1 ? 0.3 : 0.16);
         }, idx * 95);
       });
     }
@@ -987,60 +978,34 @@
     function toggleAudioMute() {
       state.audioEnabled = !state.audioEnabled;
       document.getElementById('audioIcon').textContent = state.audioEnabled ? '🔊' : '🔇';
-      document.getElementById('audioStatusText').textContent = state.audioEnabled ? 'ON' : 'OFF';
       const btn = document.getElementById('btnAudioToggle');
       btn.className = state.audioEnabled
-        ? 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-studio-border bg-studio-panelLight text-emerald-400 hover:bg-slate-800 flex items-center gap-1.5 transition'
-        : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-studio-border bg-studio-bg text-slate-500 hover:bg-slate-800 flex items-center gap-1.5 transition';
+        ? 'px-2 py-1 rounded-lg text-xs font-semibold border border-studio-border bg-studio-panelLight text-neon-fifth hover:bg-slate-700 transition'
+        : 'px-2 py-1 rounded-lg text-xs font-semibold border border-studio-border bg-studio-bg text-slate-500 hover:bg-slate-700 transition';
     }
 
     /*************************************************************************
-     * 4. FRETBOARD RENDERING ENGINE (0 TO 24 FRETS + EXACT DEGREE MAPPING)
+     * 4. FRETBOARD RENDERING ENGINE (EXACT DEGREES & ROLES)
      *************************************************************************/
     const MARKED_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 
     function getNoteLabel(pitchClass, useFlats) {
-      const n = NOTES[pitchClass % 12];
+      const n = NOTES[(pitchClass % 12 + 12) % 12];
       return useFlats ? n.flat : n.sharp;
     }
 
-    function getIntervalDegreeName(semitone, scaleId) {
-      const scaleObj = SCALES[scaleId];
-      if (scaleObj && scaleObj.degreeMap && scaleObj.degreeMap[semitone]) {
+    function getScaleDegreeLabel(semitone, scaleObj) {
+      if (scaleObj.degreeMap && scaleObj.degreeMap[semitone]) {
         return scaleObj.degreeMap[semitone];
       }
-      return INTERVAL_META[semitone].name;
+      return String(semitone);
     }
 
-    function getIntervalRole(semitone, scaleId) {
-      const scaleObj = SCALES[scaleId];
-      if (scaleObj && scaleObj.roleMap && scaleObj.roleMap[semitone]) {
+    function getScaleRole(semitone, scaleObj) {
+      if (scaleObj.roleMap && scaleObj.roleMap[semitone]) {
         return scaleObj.roleMap[semitone];
       }
-      return INTERVAL_META[semitone].role;
-    }
-
-    function getParentRootInfo(modeRoot, scaleId) {
-      const scaleObj = SCALES[scaleId];
-      if (!scaleObj) return { parentRoot: modeRoot, parentType: 'Major' };
-      if (scaleId === 'melodic_minor') {
-        return { parentRoot: modeRoot, parentType: 'Melodic Minor' };
-      }
-      if (scaleId === 'lydian_b7') {
-        // 4th mode of Melodic Minor -> Parent Melodic Minor is P5 (+7 semitones) above, or P4 (-5 semitones) below
-        const pRoot = (modeRoot + 7) % 12;
-        return { parentRoot: pRoot, parentType: 'Melodic Minor (第4モード)' };
-      }
-      if (scaleId === 'altered') {
-        // 7th mode of Melodic Minor -> Parent Melodic Minor is 1 semitone (+1) above
-        const pRoot = (modeRoot + 1) % 12;
-        return { parentRoot: pRoot, parentType: 'Melodic Minor (第7モード)' };
-      }
-      if (scaleId === 'com_dim' || scaleId === 'wh_dim') {
-        return { parentRoot: modeRoot, parentType: 'Symmetrical (3フレット周期対称)' };
-      }
-      const pRoot = (modeRoot - scaleObj.degreeOffsetFromParent + 12) % 12;
-      return { parentRoot: pRoot, parentType: `Major (${scaleObj.roman}度)` };
+      return 'scale';
     }
 
     function isFretInActiveZone(fret) {
@@ -1054,50 +1019,54 @@
     }
 
     function renderFretboard() {
-      const scaleObj = SCALES[state.scale] || SCALES.dorian;
+      const scaleObj = SCALES[state.scale] || SCALES.ionian;
       const rootNote = state.root;
-      const parentInfo = getParentRootInfo(rootNote, scaleObj.id);
-      const parentRootName = getNoteLabel(parentInfo.parentRoot, true);
-
-      // Update Header Active Status
       const rootName = getNoteLabel(rootNote, scaleObj.useFlats);
+      const homeKeyName = NOTES[state.homeKey].label;
+
+      // Update Header Readout
       document.getElementById('headerKeyDisplay').textContent = rootName;
       document.getElementById('headerScaleDisplay').textContent = scaleObj.name;
-      document.getElementById('headerParentKeyBadge').textContent = `親構成音: ${parentRootName} ${parentInfo.parentType} | ${rootName}${scaleObj.chordSuffix}`;
       document.getElementById('scaleChordHint').textContent = `対応コード: ${rootName}${scaleObj.chordSuffix} (${scaleObj.chords})`;
       document.getElementById('quickSavePreview').textContent = `${rootName} ${scaleObj.shortName}`;
-      document.getElementById('headerCharNoteSummary').textContent = `★特徴: ${scaleObj.charLabel}`;
 
-      // Calculate scale note names & degree formula for header
+      // Show relationship to Home Key or Parent Scale
+      const intervalFromHome = (rootNote - state.homeKey + 12) % 12;
+      const intervalNamesFromHome = {
+        0: 'Ⅰ(トニック)', 1: '♭Ⅱ(裏コード)', 2: 'Ⅱ', 3: '♭Ⅲ', 4: 'Ⅲ', 5: 'Ⅳ',
+        6: '#Ⅳ/♭Ⅴ', 7: 'Ⅴ(ドミナント)', 8: '♭Ⅵ', 9: 'Ⅵ', 10: '♭Ⅶ', 11: 'Ⅶ'
+      };
+      document.getElementById('headerParentKeyBadge').textContent =
+        `想定Key: ${homeKeyName} に対する ${intervalNamesFromHome[intervalFromHome]} (${rootName}${scaleObj.chordSuffix})`;
+
+      // Build Formula String
       const formulaList = scaleObj.intervals.map(semi => {
         const pc = (rootNote + semi) % 12;
         const noteStr = getNoteLabel(pc, scaleObj.useFlats);
-        const degStr = getIntervalDegreeName(semi, scaleObj.id);
+        const degStr = getScaleDegreeLabel(semi, scaleObj);
         const isChar = scaleObj.charSemitones.includes(semi);
-        const isAvoid = scaleObj.avoidSemitones.includes(semi) && !isChar;
+        const isAvoid = scaleObj.avoidSemitones.includes(semi);
         return `${noteStr}(${degStr}${isChar ? '★' : ''}${isAvoid ? '⚠️' : ''})`;
       });
       document.getElementById('headerNotesFormula').textContent = formulaList.join(' - ');
 
-      // Grid column template
-      const gridColsCss = `42px repeat(${state.fretCount}, minmax(33px, 1fr))`;
+      // Grid Template
+      const gridColsCss = `44px repeat(${state.fretCount}, minmax(33px, 1fr))`;
       const topNumsEl = document.getElementById('fretNumbersTop');
       const bottomNumsEl = document.getElementById('fretNumbersBottom');
       topNumsEl.style.gridTemplateColumns = gridColsCss;
       bottomNumsEl.style.gridTemplateColumns = gridColsCss;
 
-      // Render Fret Numbers (Top & Bottom)
       let numsHtml = '';
       for (let f = 0; f <= state.fretCount; f++) {
         const isDouble = f === 12 || f === 24;
         const isSingle = MARKED_FRETS.includes(f) && !isDouble;
-        const inZone = isFretInActiveZone(f);
-        const dimClass = inZone ? '' : 'opacity-25';
+        const dimClass = isFretInActiveZone(f) ? '' : 'opacity-25';
 
         if (f === 0) {
           numsHtml += `<div class="text-slate-400 font-bold ${dimClass}">OPEN</div>`;
         } else if (isDouble) {
-          numsHtml += `<div class="text-neon-third font-extrabold bg-studio-panelLight rounded px-0.5 border border-studio-border ${dimClass}">${f}</div>`;
+          numsHtml += `<div class="text-neon-third font-extrabold bg-studio-panelLight rounded px-1 border border-studio-border ${dimClass}">${f}</div>`;
         } else if (isSingle) {
           numsHtml += `<div class="text-slate-300 font-bold bg-studio-bg rounded ${dimClass}">${f}</div>`;
         } else {
@@ -1107,7 +1076,7 @@
       topNumsEl.innerHTML = numsHtml;
       bottomNumsEl.innerHTML = numsHtml;
 
-      // Render Inlay Dots on Fretboard Surface
+      // Inlay Markers
       const inlaysLayer = document.getElementById('fretInlaysLayer');
       inlaysLayer.style.display = 'grid';
       inlaysLayer.style.gridTemplateColumns = gridColsCss;
@@ -1132,7 +1101,7 @@
       }
       inlaysLayer.innerHTML = inlaysHtml;
 
-      // Render Strings & LED Notes
+      // Render Strings & Notes
       const stringsOrder = state.playerPov
         ? [...STANDARD_TUNING]
         : [...STANDARD_TUNING].reverse();
@@ -1145,7 +1114,6 @@
         rowEl.className = 'grid items-center relative h-7 sm:h-8';
         rowEl.style.gridTemplateColumns = gridColsCss;
 
-        // Physical Guitar String Line
         const stringLine = document.createElement('div');
         stringLine.className = `guitar-string ${strObj.wound ? 'string-wound' : 'string-plain'}`;
         stringLine.style.height = `${strObj.thickness}px`;
@@ -1163,73 +1131,70 @@
           const semitoneFromRoot = (pitchClass - rootNote + 12) % 12;
 
           const inScale = scaleObj.intervals.includes(semitoneFromRoot);
-          const isCharNote = scaleObj.charSemitones.includes(semitoneFromRoot);
-          const isAvoidNote = scaleObj.avoidSemitones.includes(semitoneFromRoot);
-          const degName = getIntervalDegreeName(semitoneFromRoot, scaleObj.id);
-          const role = getIntervalRole(semitoneFromRoot, scaleObj.id);
+          if (inScale) {
+            const isCharNote = scaleObj.charSemitones.includes(semitoneFromRoot);
+            const isAvoidNote = scaleObj.avoidSemitones.includes(semitoneFromRoot);
+            const degName = getScaleDegreeLabel(semitoneFromRoot, scaleObj);
+            const role = getScaleRole(semitoneFromRoot, scaleObj);
+            const isChordTone = ['root', 'third', 'fifth', 'seventh'].includes(role);
 
-          const isChordTone = ['root', 'third', 'fifth', 'seventh'].includes(role);
-
-          let shouldRender = inScale;
-          if (state.filterMode === 'chord' && !isChordTone) {
-            shouldRender = false;
-          } else if (state.filterMode === 'char_focus' && !isChordTone && !isCharNote) {
-            shouldRender = false;
-          } else if (state.filterMode === 'safe' && isAvoidNote) {
-            shouldRender = false;
-          }
-
-          if (isAvoidNote && state.avoidDisplay === 'hide') {
-            shouldRender = false;
-          }
-
-          if (shouldRender) {
-            const dot = document.createElement('button');
-            dot.type = 'button';
-
-            let ledClass = 'led-scale';
-            let sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] font-semibold';
-            let ringClass = '';
-
-            if (role === 'root') {
-              ledClass = 'led-root';
-              sizeClass = 'w-6 h-6 sm:w-7 sm:h-7 text-[11px] font-extrabold';
-            } else if (isAvoidNote && !isChordTone && scaleObj.id !== 'aeolian') {
-              ledClass = 'led-avoid';
-              sizeClass = 'w-5 h-5 sm:w-5 sm:h-5 text-[9px] font-normal';
-            } else if (isCharNote && !isChordTone) {
-              ledClass = 'led-char';
-              sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] font-bold';
-            } else if (role === 'third') {
-              ledClass = 'led-third';
-              sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[11px] font-bold';
-              if (isCharNote) ringClass = 'led-char-ring';
-            } else if (role === 'fifth') {
-              ledClass = isCharNote ? 'led-char' : 'led-fifth';
-              sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] font-bold';
-              if (isCharNote) ringClass = 'led-char-ring';
-            } else if (role === 'seventh') {
-              ledClass = 'led-seventh';
-              sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] font-bold';
-              if (isCharNote) ringClass = 'led-char-ring';
+            let shouldRender = true;
+            if (state.filterMode === 'chord' && !isChordTone) {
+              shouldRender = false;
+            } else if (state.filterMode === 'char_focus' && !isChordTone && !isCharNote) {
+              shouldRender = false;
+            } else if (state.filterMode === 'safe' && isAvoidNote) {
+              shouldRender = false;
             }
 
-            let opacityClass = '';
-            if (!isFretInActiveZone(f)) {
-              opacityClass = 'opacity-15 scale-75';
+            if (isAvoidNote && state.avoidDisplay === 'hide') {
+              shouldRender = false;
             }
 
-            dot.className = `led-dot rounded-full flex items-center justify-center font-mono select-none ${ledClass} ${sizeClass} ${ringClass} ${opacityClass}`;
-            
-            const noteText = getNoteLabel(pitchClass, scaleObj.useFlats);
-            dot.textContent = state.labelMode === 'interval' ? degName : noteText;
-            dot.title = `${strObj.name}弦 ${f}F: ${noteText} (${degName}${isCharNote ? ' ★特徴音' : ''}${isAvoidNote ? ' ⚠️アヴォイド' : ''})`;
+            if (shouldRender) {
+              const dot = document.createElement('button');
+              dot.type = 'button';
 
-            dot.addEventListener('click', () => {
-              playGuitarTone(midiNote, dot);
-            });
+              let ledClass = 'led-scale';
+              let sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] sm:text-[11px] font-semibold';
+              let ringClass = '';
 
-            cell.appendChild(dot);
+              if (role === 'root') {
+                ledClass = 'led-root';
+                sizeClass = 'w-6 h-6 sm:w-[28px] sm:h-[28px] text-[11px] sm:text-xs font-extrabold';
+              } else if (isAvoidNote && !isChordTone && scaleObj.id !== 'aeolian') {
+                ledClass = 'led-avoid';
+                sizeClass = 'w-5 h-5 sm:w-[22px] sm:h-[22px] text-[9px] font-normal';
+              } else if (role === 'third') {
+                ledClass = 'led-third';
+                sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[11px] font-bold';
+              } else if (isCharNote) {
+                ledClass = 'led-char';
+                sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[10px] sm:text-[11px] font-bold';
+                if (role === 'fifth' || role === 'seventh') {
+                  ringClass = 'led-char-ring';
+                }
+              } else if (role === 'fifth') {
+                ledClass = 'led-fifth';
+                sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[11px] font-bold';
+              } else if (role === 'seventh') {
+                ledClass = 'led-seventh';
+                sizeClass = 'w-6 h-6 sm:w-[26px] sm:h-[26px] text-[11px] font-bold';
+              }
+
+              const opacityClass = isFretInActiveZone(f) ? '' : 'opacity-15 scale-75';
+              dot.className = `led-dot rounded-full flex items-center justify-center font-mono select-none ${ledClass} ${sizeClass} ${ringClass} ${opacityClass}`;
+
+              const noteText = getNoteLabel(pitchClass, scaleObj.useFlats);
+              dot.textContent = state.labelMode === 'interval' ? degName : noteText;
+              dot.title = `${strObj.name}弦 ${f}F: ${noteText} (${degName}${isCharNote ? ' ★特性音/オルタード' : ''}${isAvoidNote ? ' ⚠️アヴォイド' : ''})`;
+
+              dot.addEventListener('click', () => {
+                playGuitarTone(midiNote, dot);
+              });
+
+              cell.appendChild(dot);
+            }
           }
 
           rowEl.appendChild(cell);
@@ -1238,141 +1203,245 @@
         fretGridRows.appendChild(rowEl);
       });
 
-      renderRelativeChurchModesBar();
+      renderDerivationBar();
     }
 
     /*************************************************************************
-     * 5. RELATIVE MODES / DERIVATION BAR
+     * 5. 1-TAP OUT-SCALE LAUNCHER & DERIVATION BAR
      *************************************************************************/
-    function renderRelativeChurchModesBar() {
-      const scaleObj = SCALES[state.scale] || SCALES.dorian;
-      const parentInfo = getParentRootInfo(state.root, scaleObj.id);
-      const parentMajorRoot = scaleObj.category === 'church'
-        ? parentInfo.parentRoot
-        : state.root;
-      const useFlatsInParent = [5, 10, 3, 8, 1, 6].includes(parentMajorRoot);
-      const parentMajorName = getNoteLabel(parentMajorRoot, useFlatsInParent);
+    function renderOutScaleLauncher() {
+      const homeRoot = state.homeKey;
+      const homeName = NOTES[homeRoot].sharp;
+      document.getElementById('homeKeyLabel').textContent = homeName;
 
-      const charNoteNames = scaleObj.charSemitones.map(semi => {
-        const pc = (state.root + semi) % 12;
-        return `${getIntervalDegreeName(semi, scaleObj.id)}(${getNoteLabel(pc, scaleObj.useFlats)})`;
-      }).join('・');
+      // Calculate key progression targets relative to Home Key (e.g. Key = C)
+      const iiRoot = (homeRoot + 2) % 12;      // D (II)
+      const vRoot = (homeRoot + 7) % 12;       // G (V7)
+      const subVRoot = (homeRoot + 1) % 12;    // Db (bII7 tritone sub of V7)
+      const iiiRoot = (homeRoot + 4) % 12;     // E (III7 -> VIm)
+      const viRoot = (homeRoot + 9) % 12;      // A (VIm / VI7 -> IIm)
+      const sharpDimRoot = (homeRoot + 1) % 12;// C#dim7 -> Dm7
 
-      document.getElementById('charNoteFlavorBadge').textContent = `★特徴音: ${charNoteNames} — ${scaleObj.flavorDesc}`;
-
-      const barEl = document.getElementById('relativeModesBar');
-
-      if (scaleObj.category === 'jazz') {
-        // Show Melodic Minor & Symmetrical quick derivation shortcuts for current root
-        const melMinRoot = parentInfo.parentRoot;
-        const melMinName = getNoteLabel(melMinRoot, true);
-        const rootName = getNoteLabel(state.root, true);
-
-        document.getElementById('derivationBadgeTitle').textContent = '🔄 ジャズ実戦・構成音共有＆対称ショートカット';
-        if (scaleObj.id === 'altered' || scaleObj.id === 'lydian_b7' || scaleObj.id === 'melodic_minor') {
-          document.getElementById('parentScaleExplainText').innerHTML = `
-            現在のスケールは <strong class="text-neon-char font-mono">${melMinName} Melodic Minor</strong> と<span class="underline decoration-slate-500">全く同じ7音（同じフレット位置）</span>を共有しています：
-          `;
-        } else {
-          document.getElementById('parentScaleExplainText').innerHTML = `
-            ディミニッシュ系（H-W / W-H）は <strong class="text-neon-char font-mono">短3度（3フレット）ごと</strong> に全く同じ構成音・指板パターンが繰り返される対称スケールです：
-          `;
+      const shortcuts = [
+        {
+          label: `🏠 Ⅰ:${getNoteLabel(homeRoot, false)} Ionian`,
+          sub: 'トニック(イン)',
+          root: homeRoot,
+          scale: 'ionian',
+          style: 'border-emerald-500/50 text-emerald-300'
+        },
+        {
+          label: `Ⅱm7:${getNoteLabel(iiRoot, false)} Dorian`,
+          sub: 'サブドミ(Ⅱm7)',
+          root: iiRoot,
+          scale: 'dorian',
+          style: 'border-sky-500/40 text-sky-300'
+        },
+        {
+          label: `🔥 Ⅴ7alt:${getNoteLabel(vRoot, false)} Altered`,
+          sub: `${getNoteLabel(vRoot, false)}7でアウト!`,
+          root: vRoot,
+          scale: 'altered',
+          style: 'border-rose-500/60 text-rose-300 bg-rose-950/30'
+        },
+        {
+          label: `⚡ Ⅴ7:${getNoteLabel(vRoot, false)} コンディミ`,
+          sub: `${getNoteLabel(vRoot, false)}7 H-W対称`,
+          root: vRoot,
+          scale: 'con_dimi',
+          style: 'border-amber-500/50 text-amber-300 bg-amber-950/25'
+        },
+        {
+          label: `🔄 裏:${getNoteLabel(subVRoot, true)} Lydian♭7`,
+          sub: `${getNoteLabel(vRoot, false)}altと同構成音`,
+          root: subVRoot,
+          scale: 'lydian_b7',
+          style: 'border-purple-500/50 text-purple-300'
+        },
+        {
+          label: `🔥 Ⅲ7alt:${getNoteLabel(iiiRoot, false)} Altered`,
+          sub: `→${getNoteLabel(viRoot, false)}mへ解決`,
+          root: iiiRoot,
+          scale: 'altered',
+          style: 'border-rose-500/40 text-rose-300'
+        },
+        {
+          label: `Ⅵm:${getNoteLabel(viRoot, false)} Melodic.m`,
+          sub: 'トニックmM7',
+          root: viRoot,
+          scale: 'melodic_minor',
+          style: 'border-indigo-500/40 text-indigo-300'
+        },
+        {
+          label: `#Ⅰdim7:${getNoteLabel(sharpDimRoot, false)} W-H Dimi`,
+          sub: 'パッシングdim7',
+          root: sharpDimRoot,
+          scale: 'wh_dimi',
+          style: 'border-slate-500 text-slate-300'
         }
+      ];
 
-        const relatedShortcuts = [
-          { label: 'Ⅰ度 mMaj7', root: melMinRoot, scale: 'melodic_minor', desc: `${melMinName} Melodic Minor` },
-          { label: 'Ⅳ度 7(#11) 裏コード', root: (melMinRoot + 5) % 12, scale: 'lydian_b7', desc: `${getNoteLabel((melMinRoot + 5) % 12, true)} Lydian ♭7` },
-          { label: 'Ⅶ度 7alt 解決V7', root: (melMinRoot + 11) % 12, scale: 'altered', desc: `${getNoteLabel((melMinRoot + 11) % 12, true)} Altered` },
-          { label: '同ルート Con-Dimi', root: state.root, scale: 'com_dim', desc: `${rootName} Con-Dimi (H-W)` },
-          { label: '同ルート W-H Dim', root: state.root, scale: 'wh_dim', desc: `${rootName} Diminished (W-H)` },
-          { label: '+3F対称移動 (b3上)', root: (state.root + 3) % 12, scale: state.scale, desc: `${getNoteLabel((state.root + 3) % 12, true)} (+3F同構成音)` },
-          { label: '+6F対称移動 (裏)', root: (state.root + 6) % 12, scale: state.scale, desc: `${getNoteLabel((state.root + 6) % 12, true)} (+6F裏コード)` }
-        ];
+      const barEl = document.getElementById('outScaleLauncherBar');
+      barEl.innerHTML = shortcuts.map(sc => {
+        const isCurrent = state.root === sc.root && state.scale === sc.scale;
+        return `
+          <button onclick="jumpFromLauncher(${sc.root}, '${sc.scale}')"
+            class="px-2 py-1 rounded-lg border text-left transition flex items-center gap-1.5 ${
+              isCurrent
+                ? 'bg-studio-panelLight border-neon-third text-white shadow-sm ring-1 ring-neon-third/50'
+                : `bg-studio-bg hover:bg-studio-panelLight ${sc.style}`
+            }">
+            <span class="text-[11px] font-mono font-extrabold">${sc.label}</span>
+            <span class="text-[9px] text-slate-400 hidden xl:inline">(${sc.sub})</span>
+          </button>
+        `;
+      }).join('');
+    }
 
-        barEl.innerHTML = relatedShortcuts.map(item => {
-          const isCurrent = item.root === state.root && item.scale === state.scale;
+    function renderDerivationBar() {
+      const scaleObj = SCALES[state.scale] || SCALES.ionian;
+      const barEl = document.getElementById('relativeModesBar');
+      const explainEl = document.getElementById('parentScaleExplainText');
+      const badgeEl = document.getElementById('charNoteFlavorBadge');
+
+      badgeEl.textContent = `★特徴: ${scaleObj.charLabel} — ${scaleObj.flavorDesc}`;
+
+      // Case 1: 7 Church Modes -> Show 7 Relative Modes sharing the same Parent Major Scale
+      if (scaleObj.category === 'church') {
+        const parentMajorRoot = (state.root - scaleObj.degreeOffsetFromParent + 12) % 12;
+        const useFlats = [5, 10, 3, 8, 1, 6].includes(parentMajorRoot);
+        const parentName = getNoteLabel(parentMajorRoot, useFlats);
+
+        explainEl.innerHTML = `🔄 <strong>平行調（親メジャースケール共有）</strong>: 下の7つはすべて <strong class="text-neon-third font-mono">${parentName} Major</strong> と同じ7音を共有し、ルート(赤)の位置だけが変わります：`;
+        barEl.className = 'grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1';
+
+        barEl.innerHTML = CHURCH_MODE_ORDER.map(modeId => {
+          const mObj = SCALES[modeId];
+          const derivedRoot = (parentMajorRoot + mObj.degreeOffsetFromParent) % 12;
+          const derivedName = getNoteLabel(derivedRoot, useFlats);
+          const isCurrent = derivedRoot === state.root && state.scale === modeId;
+
           return `
-            <button onclick="setKeyAndScale(${item.root}, '${item.scale}')"
-              class="px-2.5 py-1.5 rounded-lg border text-left transition flex flex-col justify-between ${
+            <button onclick="setKeyAndScale(${derivedRoot}, '${modeId}', false)"
+              class="px-2 py-1.5 rounded border text-left transition flex items-center justify-between ${
                 isCurrent
-                  ? 'bg-studio-panelLight border-neon-char text-slate-100 shadow-sm'
-                  : 'bg-studio-bg hover:bg-studio-panelLight border-studio-border text-slate-300 hover:border-slate-500'
+                  ? 'bg-studio-panelLight border-neon-third text-white'
+                  : 'bg-studio-panel hover:bg-studio-panelLight border-studio-border text-slate-300'
               }">
-              <span class="text-[10px] font-mono text-neon-char font-bold">${item.label}</span>
-              <span class="text-xs font-extrabold text-white truncate mt-0.5">${item.desc}</span>
+              <span class="text-[11px] font-bold truncate">${mObj.roman} ${derivedName} ${mObj.shortName.replace(/^[ⅠⅡⅢⅣⅤⅥⅦ]\s/, '')}</span>
+              <span class="text-[10px] font-mono px-1 rounded ${isCurrent ? 'bg-neon-root text-white' : 'bg-studio-bg text-slate-400'}">${derivedName}${mObj.chordSuffix}</span>
             </button>
           `;
         }).join('');
         return;
       }
 
-      document.getElementById('derivationBadgeTitle').textContent = '🔄 親メジャースケール共有 (平行調モード切替)';
-      document.getElementById('parentScaleExplainText').innerHTML = `
-        下の7つはすべて <strong class="text-neon-third font-mono">${parentMajorName} Major Scale</strong> と<span class="underline decoration-slate-500">全く同じ7音（同じフレット位置）</span>を共有し、ルート(赤)の位置だけが変化します：
-      `;
+      // Case 2: Melodic Minor Family (Melodic Minor, Lydian b7, Altered) -> Show shared Melodic Minor parent & equivalents
+      if (typeof scaleObj.melodicMinorOffset === 'number') {
+        const parentMmRoot = (state.root - scaleObj.melodicMinorOffset + 12) % 12;
+        const parentMmName = getNoteLabel(parentMmRoot, true);
+        const lydB7Root = (parentMmRoot + 5) % 12;
+        const altRoot = (parentMmRoot + 11) % 12;
 
-      barEl.innerHTML = CHURCH_MODE_ORDER.map(modeId => {
-        const mObj = SCALES[modeId];
-        const derivedRoot = (parentMajorRoot + mObj.degreeOffsetFromParent) % 12;
-        const derivedRootName = getNoteLabel(derivedRoot, useFlatsInParent);
-        const isCurrent = derivedRoot === state.root && state.scale === modeId;
+        explainEl.innerHTML = `🔄 <strong>メロディックマイナー派生（構成音100%一致）</strong>: 以下の3つはすべて <strong class="text-neon-char font-mono">${parentMmName} Melodic Minor</strong> と全く同じ7音（同じフレット配置）です：`;
+        barEl.className = 'grid grid-cols-1 sm:grid-cols-3 gap-1.5';
 
-        return `
-          <button onclick="setKeyAndScale(${derivedRoot}, '${modeId}')"
-            class="px-2.5 py-1.5 rounded-lg border text-left transition flex flex-col justify-between ${
-              isCurrent
-                ? 'bg-studio-panelLight border-neon-third text-slate-100 shadow-sm'
-                : 'bg-studio-bg hover:bg-studio-panelLight border-studio-border text-slate-300 hover:border-slate-500'
-            }">
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-[10px] font-mono font-extrabold ${isCurrent ? 'text-neon-third' : 'text-slate-400'}">${mObj.roman}度</span>
-              <span class="text-[10px] font-mono px-1.5 py-0.2 rounded ${
-                isCurrent ? 'bg-neon-root text-white font-bold' : 'bg-studio-panel text-slate-300'
-              }">${derivedRootName}${mObj.chordSuffix}</span>
-            </div>
-            <div class="mt-0.5">
-              <span class="text-xs font-extrabold block truncate ${isCurrent ? 'text-white' : 'text-slate-200'}">${derivedRootName} ${mObj.shortName.replace(/^[ⅠⅡⅢⅣⅤⅥⅦ]\s/, '')}</span>
-              <span class="text-[10px] text-neon-char font-mono block truncate">★${mObj.charLabel}</span>
-            </div>
-          </button>
-        `;
-      }).join('');
+        const mmRelatives = [
+          { id: 'melodic_minor', r: parentMmRoot, title: `Ⅰ度: ${parentMmName} Melodic Minor`, desc: '親メロディックマイナー (mMaj7)' },
+          { id: 'lydian_b7', r: lydB7Root, title: `Ⅳ度: ${getNoteLabel(lydB7Root, true)} Lydian ♭7`, desc: '裏コード・7(#11)視点' },
+          { id: 'altered', r: altRoot, title: `Ⅶ度: ${getNoteLabel(altRoot, false)} Altered`, desc: `${getNoteLabel(altRoot, false)}7 ドミナント・アウト視点` }
+        ];
+
+        barEl.innerHTML = mmRelatives.map(item => {
+          const isCurrent = state.root === item.r && state.scale === item.id;
+          return `
+            <button onclick="setKeyAndScale(${item.r}, '${item.id}', false)"
+              class="px-3 py-1.5 rounded border text-left transition flex items-center justify-between ${
+                isCurrent
+                  ? 'bg-studio-panelLight border-neon-third text-white'
+                  : 'bg-studio-panel hover:bg-studio-panelLight border-studio-border text-slate-300'
+              }">
+              <div>
+                <span class="text-xs font-extrabold block ${isCurrent ? 'text-neon-third' : 'text-white'}">${item.title}</span>
+                <span class="text-[10px] text-slate-400">${item.desc}</span>
+              </div>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-studio-bg text-neon-char border border-studio-border">同構成音</span>
+            </button>
+          `;
+        }).join('');
+        return;
+      }
+
+      // Case 3: Symmetrical Diminished (Con-Dimi H-W & Diminished W-H) -> Show 4 Minor-3rd (+3 frets) symmetrical roots
+      if (scaleObj.symmetricalStep === 3) {
+        explainEl.innerHTML = `🔄 <strong>3フレット（短3度）対称構造</strong>: 以下の4つのルートはすべて<strong class="text-amber-300">100%同じ8音（同じ指板形状のまま3フレット平行移動）</strong>を共有します：`;
+        barEl.className = 'grid grid-cols-2 sm:grid-cols-4 gap-1.5';
+
+        const symRoots = [
+          state.root,
+          (state.root + 3) % 12,
+          (state.root + 6) % 12,
+          (state.root + 9) % 12
+        ];
+
+        barEl.innerHTML = symRoots.map((r, idx) => {
+          const rName = getNoteLabel(r, true);
+          const isCurrent = idx === 0;
+          return `
+            <button onclick="setKeyAndScale(${r}, '${scaleObj.id}', false)"
+              class="px-3 py-1.5 rounded border text-left transition flex items-center justify-between ${
+                isCurrent
+                  ? 'bg-studio-panelLight border-neon-third text-white'
+                  : 'bg-studio-panel hover:bg-studio-panelLight border-studio-border text-slate-300'
+              }">
+              <span class="text-xs font-extrabold font-mono">${rName} ${scaleObj.shortName}</span>
+              <span class="text-[10px] font-mono text-amber-300">+${idx * 3}F</span>
+            </button>
+          `;
+        }).join('');
+      }
     }
 
     /*************************************************************************
-     * 6. KEY (TOP COMPACT 12-KEY) & SCALE SELECTOR CONTROLS (BELOW)
+     * 6. RENDER 1. KEY BAR & 2. SCALE SELECTOR GRIDS
      *************************************************************************/
     function renderKeyAndScaleSelectors() {
-      // 1. Render 12 Keys in top compact single row
+      // 1. Render 12 Keys Bar (Top Priority)
       const keyGrid = document.getElementById('keySelectorGrid');
       keyGrid.innerHTML = NOTES.map(n => {
-        const active = n.id === state.root;
+        const isCurrentRoot = n.id === state.root;
+        const isHomeKey = n.id === state.homeKey;
         return `
           <button onclick="selectRoot(${n.id})"
-            class="py-1 px-0.5 rounded-md font-mono text-[11px] sm:text-xs font-extrabold border transition truncate ${
-              active
+            class="py-1.5 px-1 rounded-lg font-mono text-xs sm:text-sm font-extrabold border transition relative flex flex-col items-center justify-center ${
+              isCurrentRoot
                 ? 'bg-neon-root text-white border-rose-300 shadow-sm'
+                : isHomeKey
+                ? 'bg-studio-panelLight text-amber-300 border-amber-400/60'
                 : 'bg-studio-bg text-slate-300 border-studio-border hover:border-slate-500 hover:text-white'
             }">
-            ${n.label}
+            <span>${n.label}</span>
+            ${isHomeKey ? '<span class="text-[8px] leading-none font-sans text-amber-200/90 mt-0.5">HOME</span>' : ''}
           </button>
         `;
       }).join('');
 
+      renderOutScaleLauncher();
+
+      // 2A. Render 7 Church Modes
+      const churchGrid = document.getElementById('churchModesGrid');
       const rootLabel = getNoteLabel(state.root, SCALES[state.scale]?.useFlats);
 
-      // 2. Render 7 Church Modes
-      const churchGrid = document.getElementById('churchScaleSelectorGrid');
       churchGrid.innerHTML = CHURCH_MODE_ORDER.map((modeId, idx) => {
         const sc = SCALES[modeId];
         const active = sc.id === state.scale;
-        const spanFull = idx === 6 ? 'sm:col-span-2' : '';
+        const spanClass = idx === 6 ? 'sm:col-span-2' : '';
 
         return `
           <button onclick="selectScale('${sc.id}')"
-            class="${spanFull} py-1.5 px-2.5 rounded-lg text-left border transition flex items-center justify-between gap-2 ${
+            class="${spanClass} py-1.5 px-2.5 rounded-lg text-left border transition flex items-center justify-between gap-2 ${
               active
-                ? 'bg-studio-panelLight text-slate-100 border-neon-third shadow-sm'
+                ? 'bg-studio-panelLight text-white border-neon-third shadow-sm'
                 : 'bg-studio-bg text-slate-300 border-studio-border hover:border-slate-500 hover:text-white'
             }">
             <div class="min-w-0">
@@ -1387,26 +1456,26 @@
         `;
       }).join('');
 
-      // 3. Render 5 Jazz / Melodic Minor / Diminished Scales
-      const jazzGrid = document.getElementById('jazzScaleSelectorGrid');
-      jazzGrid.innerHTML = JAZZ_SCALE_ORDER.map((scaleId, idx) => {
-        const sc = SCALES[scaleId];
+      // 2B. Render 5 Jazz / Out Scales
+      const jazzGrid = document.getElementById('jazzOutScalesGrid');
+      jazzGrid.innerHTML = JAZZ_OUT_SCALE_ORDER.map((modeId, idx) => {
+        const sc = SCALES[modeId];
         const active = sc.id === state.scale;
-        const spanFull = idx === 4 ? 'sm:col-span-2' : '';
+        const spanClass = idx === 4 ? 'sm:col-span-2' : '';
 
         return `
           <button onclick="selectScale('${sc.id}')"
-            class="${spanFull} py-1.5 px-2.5 rounded-lg text-left border transition flex items-center justify-between gap-2 ${
+            class="${spanClass} py-1.5 px-2.5 rounded-lg text-left border transition flex items-center justify-between gap-2 ${
               active
-                ? 'bg-studio-panelLight text-slate-100 border-neon-char shadow-sm'
+                ? 'bg-studio-panelLight text-white border-amber-400 shadow-sm'
                 : 'bg-studio-bg text-slate-300 border-studio-border hover:border-slate-500 hover:text-white'
             }">
             <div class="min-w-0">
-              <span class="text-xs font-extrabold block truncate ${active ? 'text-neon-char' : 'text-slate-100'}">${sc.name}</span>
+              <span class="text-xs font-extrabold block truncate ${active ? 'text-amber-300' : 'text-slate-100'}">${sc.name}</span>
               <span class="text-[10px] text-slate-400 block truncate">${sc.jpSub}</span>
             </div>
             <div class="text-right shrink-0">
-              <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-studio-panel border border-studio-border text-neon-seventh block">${rootLabel}${sc.chordSuffix}</span>
+              <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-studio-panel border border-studio-border text-amber-300 block">${rootLabel}${sc.chordSuffix}</span>
               <span class="text-[9px] font-mono text-neon-char block mt-0.5">★${sc.charLabel}</span>
             </div>
           </button>
@@ -1414,23 +1483,19 @@
       }).join('');
     }
 
-    function toggleFocusMode() {
-      state.focusMode = !state.focusMode;
-      const lowerEl = document.getElementById('lowerControlsWrapper');
-      const btn = document.getElementById('btnFocusToggle');
-      if (state.focusMode) {
-        lowerEl.classList.add('hidden');
-        btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold border border-neon-root bg-neon-root text-white transition';
-        btn.textContent = '📱 下部パネルを表示';
-      } else {
-        lowerEl.classList.remove('hidden');
-        btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold border border-neon-third/40 bg-studio-panelLight text-neon-third hover:bg-slate-700 transition';
-        btn.textContent = '📱 指板＆Key集中';
-      }
+    // When clicking a Key button in "1. Key設定", update both Home Key and Current Root
+    function selectRoot(rootId) {
+      const normalized = (rootId + 12) % 12;
+      state.root = normalized;
+      state.homeKey = normalized;
+      renderKeyAndScaleSelectors();
+      renderFretboard();
     }
 
-    function selectRoot(rootId) {
-      state.root = (rootId + 12) % 12;
+    // Jumping via the 1-Tap Out Launcher keeps state.homeKey locked so you never lose your song's key!
+    function jumpFromLauncher(targetRoot, targetScaleId) {
+      state.root = (targetRoot + 12) % 12;
+      if (SCALES[targetScaleId]) state.scale = targetScaleId;
       renderKeyAndScaleSelectors();
       renderFretboard();
     }
@@ -1446,39 +1511,58 @@
       renderFretboard();
     }
 
-    function setKeyAndScale(rootId, scaleId) {
+    function setKeyAndScale(rootId, scaleId, updateHome = false) {
       state.root = (rootId + 12) % 12;
+      if (updateHome) state.homeKey = state.root;
       if (SCALES[scaleId]) state.scale = scaleId;
       renderKeyAndScaleSelectors();
       renderFretboard();
     }
 
     /*************************************************************************
-     * 7. TOOLBAR SETTINGS (22/24F, POV, LABELS, FILTERS, ZONES)
+     * 7. COMPACT MOBILE LANDSCAPE FOCUS MODE & TOOLBAR CONTROLS
      *************************************************************************/
+    function toggleCompactMode() {
+      state.compactMode = !state.compactMode;
+      const lowerEl = document.getElementById('lowerWorkspace');
+      const derivEl = document.getElementById('derivationContainer');
+      const txtEl = document.getElementById('compactModeText');
+      const btnEl = document.getElementById('btnCompactFocus');
+
+      if (state.compactMode) {
+        lowerEl.classList.add('hidden');
+        derivEl.classList.add('hidden');
+        txtEl.textContent = '指板＆Key集中: ON (全表示へ戻る)';
+        btnEl.className = 'px-2.5 py-1 rounded-lg text-xs font-extrabold border border-neon-third bg-neon-third text-slate-950 flex items-center gap-1 transition';
+      } else {
+        lowerEl.classList.remove('hidden');
+        derivEl.classList.remove('hidden');
+        txtEl.textContent = '指板＆Key集中: OFF';
+        btnEl.className = 'px-2.5 py-1 rounded-lg text-xs font-bold border border-neon-third/50 bg-studio-panelLight text-neon-third hover:bg-slate-700 flex items-center gap-1 transition';
+      }
+    }
+
     function setFretCount(count) {
       state.fretCount = count;
       document.getElementById('btnFrets22').className = count === 22
-        ? 'px-2 py-1 rounded-md bg-studio-panelLight text-white font-bold shadow transition'
-        : 'px-2 py-1 rounded-md text-slate-400 hover:text-white transition';
+        ? 'px-1.5 py-0.5 rounded bg-studio-panelLight text-slate-100 font-bold transition'
+        : 'px-1.5 py-0.5 rounded text-slate-400 hover:text-white transition';
       document.getElementById('btnFrets24').className = count === 24
-        ? 'px-2 py-1 rounded-md bg-studio-panelLight text-white font-bold shadow transition'
-        : 'px-2 py-1 rounded-md text-slate-400 hover:text-white transition';
+        ? 'px-1.5 py-0.5 rounded bg-studio-panelLight text-slate-100 font-bold transition'
+        : 'px-1.5 py-0.5 rounded text-slate-400 hover:text-white transition';
       renderFretboard();
     }
 
     function toggleOrientation() {
       state.playerPov = !state.playerPov;
-      document.getElementById('povStatusText').textContent = state.playerPov
-        ? '1弦=上'
-        : '6弦=上';
+      document.getElementById('povStatusText').textContent = state.playerPov ? '1弦=上' : '6弦=上';
       renderFretboard();
     }
 
     function setLabelMode(mode) {
       state.labelMode = mode;
-      const activeCls = 'px-2.5 py-1 rounded-md bg-studio-panelLight text-neon-third font-bold transition';
-      const inactiveCls = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition';
+      const activeCls = 'px-2 py-0.5 rounded bg-studio-panelLight text-neon-third font-bold transition';
+      const inactiveCls = 'px-2 py-0.5 rounded text-slate-400 hover:text-white transition';
       document.getElementById('btnLabelInterval').className = mode === 'interval' ? activeCls : inactiveCls;
       document.getElementById('btnLabelNote').className = mode === 'note' ? activeCls : inactiveCls;
       renderFretboard();
@@ -1488,10 +1572,10 @@
       state.avoidDisplay = state.avoidDisplay === 'dim' ? 'hide' : 'dim';
       const txt = document.getElementById('avoidModeText');
       if (state.avoidDisplay === 'hide') {
-        txt.textContent = '完全非表示';
+        txt.textContent = '非表示';
         txt.className = 'text-rose-400 font-bold';
       } else {
-        txt.textContent = '暗め表示';
+        txt.textContent = '暗め';
         txt.className = 'text-amber-400/90';
       }
       renderFretboard();
@@ -1503,8 +1587,8 @@
         const el = document.getElementById(`filter-${m}`);
         if (!el) return;
         el.className = m === mode
-          ? 'px-2 py-1 rounded text-[11px] font-bold bg-studio-panelLight text-slate-100 transition'
-          : 'px-2 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white transition';
+          ? 'px-1.5 py-0.5 rounded text-[10px] font-bold bg-studio-panelLight text-slate-100 transition'
+          : 'px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition';
       });
       renderFretboard();
     }
@@ -1513,9 +1597,10 @@
       state.zoneFilter = zone;
       ['all', 'low', 'mid', 'high', 'upper'].forEach(z => {
         const el = document.getElementById(`zone-${z}`);
+        if (!el) return;
         el.className = z === zone
-          ? 'px-2 py-1 rounded text-[11px] font-bold bg-studio-panelLight text-slate-100 transition'
-          : 'px-1.5 py-1 rounded text-[11px] text-slate-400 hover:text-white transition';
+          ? 'px-1.5 py-0.5 rounded text-[10px] font-bold bg-studio-panelLight text-slate-100 transition'
+          : 'px-1.5 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition';
       });
       renderFretboard();
     }
@@ -1523,7 +1608,7 @@
     /*************************************************************************
      * 8. LIVE SETLIST & SONG SECTION SWITCHER
      *************************************************************************/
-    const STORAGE_KEY = 'smart_fretboard_pro_church_modes_v2';
+    const STORAGE_KEY = 'smart_fretboard_pro_out_scales_v3';
 
     function loadSetlistFromStorage() {
       try {
@@ -1575,38 +1660,37 @@
       const padsGrid = document.getElementById('sectionPadsGrid');
 
       if (!activeSong || activeSong.sections.length === 0) {
-        padsGrid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">セクションがありません。「＋ セクション追加」で登録してください。</div>`;
+        padsGrid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">セクションがありません。「＋ セクション登録」で追加してください。</div>`;
         return;
       }
 
       padsGrid.innerHTML = activeSong.sections.map((sec, idx) => {
         const isCurrent = idx === state.activeSectionIndex;
-        const scObj = SCALES[sec.scale] || SCALES.dorian;
+        const scObj = SCALES[sec.scale] || SCALES.ionian;
         const rootLabel = getNoteLabel(sec.root, scObj.useFlats);
-        const scaleLabel = scObj.shortName;
         return `
           <div onclick="activateSection(${idx})"
-            class="group cursor-pointer rounded-xl p-2.5 border transition flex flex-col justify-between relative ${
+            class="group cursor-pointer rounded-xl p-2 border transition flex flex-col justify-between relative ${
               isCurrent
                 ? 'section-pad-active'
                 : 'bg-studio-bg border-studio-border hover:border-slate-500'
             }">
-            <div class="flex items-center justify-between gap-1 mb-1">
+            <div class="flex items-center justify-between gap-1 mb-0.5">
               <span class="text-[11px] font-bold text-slate-200 truncate">
                 <span class="font-mono text-neon-third mr-1">[${idx + 1}]</span>${sec.name}
               </span>
               <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100" onclick="event.stopPropagation()">
-                <button onclick="editSectionName(${idx})" class="text-[11px] text-slate-400 hover:text-white px-1" title="セクション名変更">✎</button>
-                <button onclick="deleteSection(${idx})" class="text-[11px] text-slate-400 hover:text-rose-400 px-1" title="削除">✕</button>
+                <button onclick="editSectionName(${idx})" class="text-[11px] text-slate-400 hover:text-white px-1">✎</button>
+                <button onclick="deleteSection(${idx})" class="text-[11px] text-slate-400 hover:text-rose-400 px-1">✕</button>
               </div>
             </div>
             <div class="flex items-baseline justify-between">
               <div class="flex items-baseline gap-1.5">
-                <span class="text-base font-extrabold font-mono text-neon-root">${rootLabel}</span>
-                <span class="text-xs font-bold text-white">${scaleLabel}</span>
-                <span class="text-[10px] font-mono text-fuchsia-300">★${scObj.charLabel}</span>
+                <span class="text-sm font-extrabold font-mono text-neon-root">${rootLabel}</span>
+                <span class="text-xs font-bold text-white">${scObj.shortName}</span>
+                <span class="text-[10px] font-mono text-neon-char">★${scObj.charLabel}</span>
               </div>
-              ${isCurrent ? '<span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-neon-third text-slate-950 font-extrabold">ACTIVE</span>' : ''}
+              ${isCurrent ? '<span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-neon-third text-slate-950 font-extrabold">ACTIVE</span>' : ''}
             </div>
           </div>
         `;
@@ -1649,10 +1733,11 @@
     function addCurrentStateAsSection() {
       const song = getActiveSong();
       if (!song) return;
-      const defaultName = `Part ${song.sections.length + 1}`;
+      const scObj = SCALES[state.scale] || SCALES.ionian;
+      const defaultName = `${getNoteLabel(state.root, scObj.useFlats)} ${scObj.shortName}`;
       openDialogModal({
         title: '現在の指板をセクション追加',
-        subtitle: `登録内容: ${NOTES[state.root].label} ${SCALES[state.scale].shortName}`,
+        subtitle: `登録内容: ${defaultName}`,
         defaultValue: defaultName,
         onConfirm: (val) => {
           song.sections.push({
@@ -1681,7 +1766,7 @@
       if (!song || !song.sections[idx]) return;
       openDialogModal({
         title: 'セクション名の変更',
-        subtitle: 'セクション名を入力してください',
+        subtitle: '新しいセクション名を入力してください',
         defaultValue: song.sections[idx].name,
         onConfirm: (val) => {
           if (val) {
@@ -1715,7 +1800,7 @@
             id: newId,
             title: val || 'Untitled Song',
             sections: [
-              { name: 'Intro / Main', root: state.root, scale: state.scale }
+              { name: 'Section 1', root: state.root, scale: state.scale }
             ]
           });
           saveSetlistToStorage();
@@ -1748,9 +1833,7 @@
       selectSong(state.setlist[0].id);
     }
 
-    /*************************************************************************
-     * 9. CUSTOM DIALOG MODAL HELPER (NO ALERT/PROMPT)
-     *************************************************************************/
+    // Custom Dialog Helper
     let dialogCallback = null;
 
     function openDialogModal({ title, subtitle, defaultValue, onConfirm }) {
@@ -1786,11 +1869,8 @@
       }
     });
 
-    /*************************************************************************
-     * 10. KEYBOARD SHORTCUTS & WEB MIDI API INTEGRATION
-     *************************************************************************/
+    // Keyboard & Web MIDI
     window.addEventListener('keydown', (e) => {
-      // Ignore shortcuts when typing inside an input
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
 
       if (e.code === 'Space' || e.code === 'ArrowRight') {
@@ -1808,7 +1888,6 @@
       }
     });
 
-    // Web MIDI Setup
     function initWebMidi() {
       if (!navigator.requestMIDIAccess) {
         document.getElementById('midiModalStatus').textContent = 'ブラウザ非対応 (Chrome推奨)';
@@ -1817,17 +1896,11 @@
       navigator.requestMIDIAccess().then((midiAccess) => {
         const inputs = Array.from(midiAccess.inputs.values());
         updateMidiStatusUI(inputs.length);
-
-        inputs.forEach(input => {
-          input.onmidimessage = handleMidiMessage;
-        });
-
+        inputs.forEach(input => { input.onmidimessage = handleMidiMessage; });
         midiAccess.onstatechange = () => {
           const currentInputs = Array.from(midiAccess.inputs.values());
           updateMidiStatusUI(currentInputs.length);
-          currentInputs.forEach(input => {
-            input.onmidimessage = handleMidiMessage;
-          });
+          currentInputs.forEach(input => { input.onmidimessage = handleMidiMessage; });
         };
       }).catch(() => {
         document.getElementById('midiModalStatus').textContent = 'MIDIアクセス拒否';
@@ -1838,12 +1911,12 @@
       const dot = document.getElementById('midiStatusDot');
       const statusText = document.getElementById('midiModalStatus');
       if (deviceCount > 0) {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
-        statusText.textContent = `接続済 (${deviceCount} デバイス)`;
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        statusText.textContent = `接続済 (${deviceCount}台)`;
         statusText.className = 'font-mono font-bold text-emerald-400';
       } else {
         dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-        statusText.textContent = 'MIDI機器待機中 (0台)';
+        statusText.textContent = '待機中 (0台)';
         statusText.className = 'font-mono font-bold text-slate-400';
       }
     }
@@ -1851,10 +1924,7 @@
     function handleMidiMessage(event) {
       const [status, data1, data2] = event.data;
       const command = status & 0xf0;
-      // Ignore NoteOff or CC release (value 0)
-      if (command === 0x80 || (command === 0x90 && data2 === 0) || (command === 0xb0 && data2 === 0)) {
-        return;
-      }
+      if (command === 0x80 || (command === 0x90 && data2 === 0) || (command === 0xb0 && data2 === 0)) return;
 
       const signature = `${command}:${data1}`;
       document.getElementById('midiLastMessage').textContent = `Status:${status} Data1:${data1} Val:${data2}`;
@@ -1863,22 +1933,19 @@
         state.midiBindings.prev = signature;
         state.midiLearnTarget = null;
         document.getElementById('midiPrevBindText').textContent = `割当済 (${signature})`;
-        document.getElementById('btnLearnPrev').textContent = 'MIDI Learn (待機開始)';
+        document.getElementById('btnLearnPrev').textContent = 'MIDI Learn';
         return;
       }
       if (state.midiLearnTarget === 'next') {
         state.midiBindings.next = signature;
         state.midiLearnTarget = null;
         document.getElementById('midiNextBindText').textContent = `割当済 (${signature})`;
-        document.getElementById('btnLearnNext').textContent = 'MIDI Learn (待機開始)';
+        document.getElementById('btnLearnNext').textContent = 'MIDI Learn';
         return;
       }
 
-      if (state.midiBindings.prev === signature) {
-        stepSection(-1);
-      } else if (state.midiBindings.next === signature) {
-        stepSection(1);
-      }
+      if (state.midiBindings.prev === signature) stepSection(-1);
+      else if (state.midiBindings.next === signature) stepSection(1);
     }
 
     function openMidiModal() {
@@ -1897,11 +1964,8 @@
 
     function startMidiLearn(target) {
       state.midiLearnTarget = target;
-      if (target === 'prev') {
-        document.getElementById('btnLearnPrev').textContent = 'ペダルを踏んでください...';
-      } else {
-        document.getElementById('btnLearnNext').textContent = 'ペダルを踏んでください...';
-      }
+      if (target === 'prev') document.getElementById('btnLearnPrev').textContent = 'ペダルを踏んでください...';
+      else document.getElementById('btnLearnNext').textContent = 'ペダルを踏んでください...';
     }
 
     function clearMidiBindings() {
@@ -1911,9 +1975,6 @@
       document.getElementById('midiNextBindText').textContent = '未割当';
     }
 
-    /*************************************************************************
-     * 11. INITIALIZE ON LOAD
-     *************************************************************************/
     window.onload = function () {
       loadSetlistFromStorage();
       const firstSong = getActiveSong();
